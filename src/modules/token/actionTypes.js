@@ -1,4 +1,0 @@
-export const START_LOAD = 'TOKEN_START_LOAD'
-export const MODULE = 'TOKEN_MODULE'
-export const BALACE = 'TOKEN_TOKEN_BALACE'
-export const APPROVE = 'TOKEN_TOKEN_APPROVE'
