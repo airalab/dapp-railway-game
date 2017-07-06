@@ -58,7 +58,7 @@ const Main = props => (
                       order.price - props.approve
                     )}
                   >
-                    Add to approve {order.price - props.approve} Air
+                    Approve {order.price - props.approve} Air
                   </button>
                 }
               </td>

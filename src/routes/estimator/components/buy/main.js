@@ -63,7 +63,7 @@ class Main extends Component {
             e.preventDefault();
           }}
         >
-          Add to approve {approve}
+          Approve {approve}
         </button>
       )
     }

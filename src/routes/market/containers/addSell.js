@@ -43,10 +43,15 @@ function mapStateToProps(state, props) {
     quote,
     token,
     approve: ap,
-    calcApprove: (v, p) => {
-      if (v === '' || p === '') {
-        return false
+    validate: (form) => {
+      const v = Number(form.value);
+      const p = Number(form.price);
+      if (v <= 0 || p <= 0) {
+        return false;
       }
+      return true;
+    },
+    calcApprove: (v) => {
       const value = new BigNumber(v);
       const allowance = new BigNumber(ap);
       return value.minus(allowance).toNumber();

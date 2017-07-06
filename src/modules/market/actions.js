@@ -206,13 +206,20 @@ export function loadModule(address) {
         dispatch(loadAsks(address))
         dispatch(loadBids(address))
         hett.watcher.addAddress(info.base, 'loadTokenBase', () => {
-          dispatch(loadModule(address));
+          dispatch(loadApprove(info.base, address))
+          dispatch(loadBalance(info.base, hett.web3h.coinbase()))
         })
         hett.watcher.addAddress(info.quote, 'loadTokenQuote', () => {
-          dispatch(loadModule(address));
+          dispatch(loadApprove(info.quote, address))
+          dispatch(loadBalance(info.quote, hett.web3h.coinbase()))
         })
         hett.watcher.addAddress(address, 'loadMarket', () => {
-          dispatch(loadModule(address));
+          dispatch(loadAsks(address))
+          dispatch(loadBids(address))
+          dispatch(loadApprove(info.base, address))
+          dispatch(loadApprove(info.quote, address))
+          dispatch(loadBalance(info.base, hett.web3h.coinbase()))
+          dispatch(loadBalance(info.quote, hett.web3h.coinbase()))
         })
       })
   }

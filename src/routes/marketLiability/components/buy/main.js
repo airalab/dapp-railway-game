@@ -50,7 +50,7 @@ class Main extends Component {
             e.preventDefault();
           }}
         >
-          Add to approve {approve[1]} AIR
+          Approve {approve[1]} AIR
         </button>
       )
     }
