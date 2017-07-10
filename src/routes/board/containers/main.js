@@ -5,7 +5,7 @@ import _ from 'lodash'
 import { Link } from 'react-router'
 import { loadModule, loadLastPrice } from '../../../modules/market/actions';
 import { MARKET_DEFAULT_ADDR1, MARKET_DEFAULT_ADDR2 } from '../../../config/config'
-import Video from '../components/video/main'
+import { Ivideon, Youtube } from '../components/video'
 
 class Container extends Component {
   componentWillMount() {
@@ -42,7 +42,8 @@ class Container extends Component {
             </div>
           </div>
         </div>
-        <Video />
+        <Ivideon />
+        <Youtube />
       </div>
     </div>)
   }

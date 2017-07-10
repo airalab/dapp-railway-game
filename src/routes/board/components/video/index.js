@@ -1,1 +1,2 @@
-export { default as Main } from './main';
+export { default as Ivideon } from './ivideon';
+export { default as Youtube } from './youtube';
