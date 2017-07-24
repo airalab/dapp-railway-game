@@ -1,5 +1,6 @@
 import React from 'react'
 import EthLink from '../../../../shared/components/common/ethLink';
+import { timeConverter } from '../../../../utils/helper'
 
 const Main = props => (
   (<div className="panel panel-default">
@@ -21,7 +22,7 @@ const Main = props => (
               <td><EthLink address={order.agent} /></td>
               <td>{order.value}</td>
               <td>{order.startValue}</td>
-              <td>{order.stamp}</td>
+              <td>{timeConverter(order.stamp)}</td>
             </tr>
           )}
         </tbody>

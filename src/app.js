@@ -3,10 +3,10 @@ import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 import { Router, hashHistory } from 'react-router'
 import { I18nextProvider } from 'react-i18next';
+import hett from 'hett'
 import configureStore from './config/store'
 import { routes } from './config/routes'
 import i18n from './config/i18n';
-import hett from './utils/hett'
 import { ProviderAbi } from './utils/helper'
 import * as abis from './abi'
 

@@ -1,6 +1,6 @@
 import Promise from 'bluebird'
+import hett from 'hett'
 import { START_LOAD, MODULE, BALACE, APPROVE } from './actionTypes'
-import hett from '../../utils/hett'
 import { formatDecimals } from '../../utils/helper'
 import { flashMessage } from '../app/actions'
 

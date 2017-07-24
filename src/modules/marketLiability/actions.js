@@ -1,7 +1,7 @@
 import Promise from 'bluebird'
 import _ from 'lodash'
+import hett from 'hett'
 import { LOAD, MODULE, SET_ASKS_ORDERS, SET_BIDS_ORDERS } from './actionTypes'
-import hett from '../../utils/hett'
 import { flashMessage } from '../app/actions'
 import { loadApprove } from '../token/actions'
 import { TOKEN_ADDR_AIR } from '../../config/config'

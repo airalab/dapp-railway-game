@@ -2,8 +2,8 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
+import hett from 'hett'
 import { events, loadModule } from '../../../modules/market/actions';
-import hett from '../../../utils/hett'
 import { Main as Buy } from '../components/buy';
 import { Main as Sell } from '../components/sell';
 import Asks from './asks';

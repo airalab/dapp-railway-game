@@ -1,6 +1,6 @@
 import Promise from 'bluebird'
+import hett from 'hett'
 import { START_LOAD, MODULE } from './actionTypes'
-import hett from '../../utils/hett'
 import { flashMessage } from '../app/actions'
 import { loadApprove, loadBalance } from '../token/actions'
 

@@ -2,27 +2,29 @@ import Promise from 'bluebird'
 import BigNumber from 'bignumber.js'
 import _ from 'lodash'
 import axios from 'axios'
-import hett from './hett'
+import hett from 'hett'
 
 export const promiseFor = Promise.method((condition, action, value) => {
   if (!condition(value)) return value;
   return action(value).then(promiseFor.bind(null, condition, action));
 });
-// promiseFor(count => count < 10, count => (
-//   new Promise((resolve) => {
-//     setTimeout(() => {
-//       console.log(count);
-//       resolve(count + 1);
-//     }, 250);
-//   })
-// ), 0)
-//   .then(() => {
-//     console.log('good');
-//   });
 
 export const formatDecimals = (price, decimals) => {
   const priceNum = new BigNumber(price);
   return priceNum.shift(-decimals).toNumber();
+}
+
+export const timeConverter = (timestamp) => {
+  const a = new Date(timestamp * 1000);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const year = a.getFullYear();
+  const month = months[a.getMonth()];
+  const date = a.getDate();
+  const hour = a.getHours();
+  const min = a.getMinutes();
+  const sec = a.getSeconds();
+  const time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
+  return time;
 }
 
 const getUrlAbi = (contract) => {
@@ -30,29 +32,13 @@ const getUrlAbi = (contract) => {
   if (/builder/i.test(contract)) {
     isBuilder = true;
   }
-  const ipci = [
-    'BuilderAuditor',
-    'BuilderComplier',
-    'BuilderInsuranceHolder',
-    'BuilderIssuerLedger',
-    'BuilderOperator',
-    'Auditor',
-    'Complier',
-    'InsuranceHolder',
-  ]
   let repo = 'core'
   let version = '64e36c8ea43bb06ae8dd81a65af6d769b366f3c1';
-  if (_.indexOf(ipci, contract) >= 0) {
-    repo = 'DAO-IPCI'
-    version = '79c192ff18abe5c78f1d1ec607dee03b5641dbcc';
-  } else if (isBuilder) {
+  if (isBuilder) {
     repo = 'DAO-Factory'
     version = 'cb5b7c0ad9203e773b1db058540846e62a2931ff';
   }
   let url = 'https://raw.githubusercontent.com/airalab/' + repo + '/' + version + '/abi/'
-  if (isBuilder && repo === 'DAO-IPCI') {
-    url += 'builder/'
-  }
   url += contract + '.json'
   return url
 }

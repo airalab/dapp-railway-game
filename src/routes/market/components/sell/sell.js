@@ -4,7 +4,7 @@ class Sell extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: 0
+      value: ''
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -25,39 +25,41 @@ class Sell extends Component {
     let error = null
     let btn = null
     let currentApprove = null
-    if (valid) {
-      const approve = this.props.calcApprove(this.state.value);
-      if (approve !== false && approve <= 0) {
-        btn = <button type="submit" className="btn btn-default">Sell</button>
-        currentApprove = (
-          <div className="text-success" style={{ marginBottom: 10 }}>
-            <span className="fa fa-check" /> current approve: <b>{this.props.approve} {this.props.base.info.symbol}</b>
-          </div>
-        )
-      } else if (approve !== false) {
-        btn = (
-          <button
-            className="btn btn-warning"
-            onClick={(e) => {
-              this.props.onApprove(
-                this.props.token,
-                this.props.address,
-                approve
-              );
-              e.preventDefault();
-            }}
-          >
-            Approve {approve} {this.props.base.info.symbol}
-          </button>
-        )
-        currentApprove = (
-          <div className="text-warning" style={{ marginBottom: 10 }}>
-            <span className="fa fa-exclamation" /> current approve: <b>{this.props.approve} {this.props.base.info.symbol}</b>
-          </div>
-        )
+    if (this.state.value !== '') {
+      if (valid) {
+        const approve = this.props.calcApprove(this.state.value);
+        if (approve !== false && approve <= 0) {
+          btn = <button type="submit" className="btn btn-default">Sell</button>
+          currentApprove = (
+            <div className="text-success" style={{ marginBottom: 10 }}>
+              <span className="fa fa-check" /> current approve: <b>{this.props.approve} {this.props.base.info.symbol}</b>
+            </div>
+          )
+        } else if (approve !== false) {
+          btn = (
+            <button
+              className="btn btn-warning"
+              onClick={(e) => {
+                this.props.onApprove(
+                  this.props.token,
+                  this.props.address,
+                  approve
+                );
+                e.preventDefault();
+              }}
+            >
+              Approve {approve} {this.props.base.info.symbol}
+            </button>
+          )
+          currentApprove = (
+            <div className="text-warning" style={{ marginBottom: 10 }}>
+              <span className="fa fa-exclamation" /> current approve: <b>{this.props.approve} {this.props.base.info.symbol}</b>
+            </div>
+          )
+        }
+      } else {
+        error = <div className="alert alert-danger">Form is not filled out correctly</div>;
       }
-    } else {
-      error = <div className="alert alert-danger">Form is not filled out correctly</div>;
     }
     return (
       <div>

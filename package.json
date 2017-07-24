@@ -16,6 +16,7 @@
     "babel-runtime": "^6.23.0",
     "bignumber.js": "^4.0.2",
     "bluebird": "^3.5.0",
+    "hett": "^0.0.1",
     "i18next": "^8.4.2",
     "i18next-resource-store-loader": "^0.1.2",
     "i18next-xhr-backend": "^1.4.2",
