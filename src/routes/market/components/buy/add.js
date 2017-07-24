@@ -31,27 +31,7 @@ class Add extends Component {
         const approve = this.props.calcApprove(this.state.value, this.state.price);
         if (approve !== false && approve <= 0) {
           btn = <button type="submit" className="btn btn-default">Buy</button>
-          currentApprove = (
-            <div className="text-success" style={{ marginBottom: 10 }}>
-              <span className="fa fa-check" /> current approve: <b>{this.props.approve} {this.props.quote.info.symbol}</b>
-            </div>
-          )
         } else if (approve !== false) {
-          btn = (
-            <button
-              className="btn btn-warning"
-              onClick={(e) => {
-                this.props.onApprove(
-                  this.props.token,
-                  this.props.address,
-                  approve
-                );
-                e.preventDefault();
-              }}
-            >
-              Approve {approve} {this.props.quote.info.symbol}
-            </button>
-          )
           currentApprove = (
             <div className="text-warning" style={{ marginBottom: 10 }}>
               <span className="fa fa-exclamation" /> current approve: <b>{this.props.approve} {this.props.quote.info.symbol}</b>

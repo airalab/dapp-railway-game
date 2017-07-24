@@ -4,7 +4,6 @@ import _ from 'lodash'
 import BigNumber from 'bignumber.js'
 import Buy from '../components/buy/buy';
 import { send as marketSend } from '../../../modules/market/actions';
-import { send as tokenSend } from '../../../modules/token/actions';
 
 function mapStateToProps(state, props) {
   const address = props.address
@@ -82,12 +81,10 @@ function mapStateToProps(state, props) {
 }
 function mapDispatchToProps(dispatch, props) {
   const actions = bindActionCreators({
-    marketSend,
-    tokenSend
+    marketSend
   }, dispatch)
   return {
-    onSubmit: form => actions.marketSend(props.address, 'orderMarket', [1, form.value]),
-    onApprove: (address, to, value) => actions.tokenSend(address, 'approve', [to, value])
+    onSubmit: form => actions.marketSend(props.address, 'orderMarket', [1, form.value])
   }
 }
 

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-class Sell extends Component {
+class Add extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -24,36 +24,31 @@ class Sell extends Component {
     const valid = this.props.validate(this.state);
     let error = null
     let btn = null
-    let currentApprove = null
     if (this.state.value !== '') {
       if (valid) {
-        const approve = this.props.calcApprove(this.state.value);
-        if (approve !== false && approve <= 0) {
-          btn = <button type="submit" className="btn btn-default">Sell</button>
-        } else if (approve !== false) {
-          currentApprove = (
-            <div className="text-warning" style={{ marginBottom: 10 }}>
-              <span className="fa fa-exclamation" /> current approve: <b>{this.props.approve} {this.props.base.info.symbol}</b>
-            </div>
-          )
-        }
+        btn = <button type="submit" className="btn btn-default">Подтвердить</button>
       } else {
         error = <div className="alert alert-danger">Form is not filled out correctly</div>;
       }
     }
     return (
       <div>
-        <p>Sell Order <b>{this.props.base.info.name}</b></p>
+        <p>
+          Баланс токенов: <b>{this.props.balance} {this.props.tokenInfo.info.symbol}</b>
+        </p>
+        <p>
+          Разрешено для торговли: <b>{this.props.approve} {this.props.tokenInfo.info.symbol}</b>
+        </p>
+        <p>Укажите новый лимит для торговли:</p>
         <form onSubmit={this.handleSubmit}>
           <div className="form-group">
-            <span className="control-label">value:</span>
+            <span className="control-label">количество:</span>
             <div className="input-group">
               <input value={this.state.value} onChange={this.handleChange} name="value" type="text" className="form-control form-control-b" />
-              <div className="input-group-addon">{this.props.base.info.symbol}</div>
+              <div className="input-group-addon">{this.props.tokenInfo.info.symbol}</div>
             </div>
           </div>
           {error}
-          {currentApprove}
           {btn}
         </form>
       </div>
@@ -61,4 +56,4 @@ class Sell extends Component {
   }
 }
 
-export default Sell
+export default Add

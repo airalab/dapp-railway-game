@@ -18,7 +18,8 @@ const notWeb3 = () => {
 const notAccounts = () => {
   render(
     <div className="container" id="maincontainer">
-      <p>not accounts</p>
+      <p>[ENG] Please unlock metamask account and try to refresh browser page.</p>
+      <p>[RUS] Пожалуйста, разблокируйте ваш metamask аккаунт или обновите страницу в браузере.</p>
     </div>,
     document.getElementById('root')
   )

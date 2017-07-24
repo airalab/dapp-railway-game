@@ -3,6 +3,7 @@ import market from './market/reducer';
 import marketLiability from './marketLiability/reducer';
 import estimator from './estimator/reducer';
 import token from './token/reducer';
+import history from './history/reducer';
 
 export {
   app,
@@ -10,4 +11,5 @@ export {
   marketLiability,
   estimator,
   token,
+  history,
 };

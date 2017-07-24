@@ -6,9 +6,11 @@ import hett from 'hett'
 import { events, loadModule } from '../../../modules/market/actions';
 import { Main as Buy } from '../components/buy';
 import { Main as Sell } from '../components/sell';
+import Approve from './approve';
 import Asks from './asks';
 import Bids from './bids';
 import EthLink from '../../../shared/components/common/ethLink';
+import { MARKET_DEFAULT_ADDR1 } from '../../../config/config';
 
 class Container extends Component {
   componentWillMount() {
@@ -21,31 +23,41 @@ class Container extends Component {
     }
     return (<div>
       <div>
-        <h1>{this.props.market.info.name}</h1>
+        <h1>Circle-market {(MARKET_DEFAULT_ADDR1 === this.props.market.address) ? 'A' : 'B'}</h1>
         <hr />
-        <p>address: <EthLink address={this.props.market.address} /></p>
-        <div className="panel panel-default">
-          <div className="panel-body">
-            Base: <b>
-              <EthLink
-                address={this.props.market.info.base}
-                title={this.props.base.info.name}
-                type="token"
-              />
-            </b>&nbsp;
-            (my balance: <b>{this.props.balanceBase}</b>)
+        <p>Адрес контракта рынка: <EthLink address={this.props.market.address} /></p>
+        <div className="row">
+          <div className="col-md-6">
+            <div className="panel panel-default">
+              <div className="panel-body">
+                <p>
+                  <b>
+                    <EthLink
+                      address={this.props.market.info.base}
+                      title={this.props.base.info.name}
+                      type="token"
+                    />
+                  </b>
+                </p>
+                <Approve token={this.props.market.info.base} address={this.props.market.address} />
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="panel panel-default">
-          <div className="panel-body">
-            Quote: <b>
-              <EthLink
-                address={this.props.market.info.quote}
-                title={this.props.quote.info.name}
-                type="token"
-              />
-            </b>&nbsp;
-            (my balance: <b>{this.props.balanceQuote}</b>)
+          <div className="col-md-6">
+            <div className="panel panel-default">
+              <div className="panel-body">
+                <p>
+                  <b>
+                    <EthLink
+                      address={this.props.market.info.quote}
+                      title={this.props.quote.info.name}
+                      type="token"
+                    />
+                  </b>
+                </p>
+                <Approve token={this.props.market.info.quote} address={this.props.market.address} />
+              </div>
+            </div>
           </div>
         </div>
         <div className="row">
@@ -56,20 +68,15 @@ class Container extends Component {
             <Sell address={this.props.market.address} />
           </div>
         </div>
+        <h2>Информация о рынке</h2>
         <div className="row">
-          <div className="col-md-12">
-            <ul className="nav nav-tabs">
-              <li className="active"><a href="#1" data-toggle="tab">Buy</a></li>
-              <li><a href="#2" data-toggle="tab">Sell</a></li>
-            </ul>
-            <div className="tab-content">
-              <div className="tab-pane active" id="1">
-                <Asks address={this.props.market.address} />
-              </div>
-              <div className="tab-pane" id="2">
-                <Bids address={this.props.market.address} />
-              </div>
-            </div>
+          <div className="col-md-6">
+            <h3>Ордера на продажу</h3>
+            <Bids address={this.props.market.address} />
+          </div>
+          <div className="col-md-6">
+            <h3>Ордера на покупку</h3>
+            <Asks address={this.props.market.address} />
           </div>
         </div>
       </div>

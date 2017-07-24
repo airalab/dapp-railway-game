@@ -5,7 +5,7 @@ import React from 'react'
 
 const Main = () => (
   <div style={{ margin: '0 auto', padding: 0, border: 0, width: 853 }}>
-    <iframe width="853" height="480" src="https://www.youtube.com/embed/XW0gDfBqPEo" frameborder="0" allowfullscreen />
+    <iframe width="853" height="480" src="https://www.youtube.com/embed/B85DpmXeVp8" frameBorder="0" allowFullScreen />
   </div>
 )
 

@@ -2,10 +2,13 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
-import { Link } from 'react-router'
-import { loadModule, loadLastPrice } from '../../../modules/market/actions';
 import { MARKET_DEFAULT_ADDR1, MARKET_DEFAULT_ADDR2 } from '../../../config/config'
-import { Ivideon, Youtube } from '../components/video'
+import { Main } from '../components/main'
+import { Youtube } from '../components/video'
+import { Main as Log } from '../components/log'
+import { loadModule, loadLastPrice } from '../../../modules/market/actions';
+import { load } from '../../../modules/history/actions';
+import { timeConverter } from '../../../utils/helper'
 
 class Container extends Component {
   componentWillMount() {
@@ -13,40 +16,67 @@ class Container extends Component {
     this.props.loadModule(this.props.address2);
     this.props.loadLastPrice(this.props.address1);
     this.props.loadLastPrice(this.props.address2);
+    this.props.load(this.props.address1, this.props.address2);
   }
   render() {
     return (<div>
       <div>
-        <h1>Markets</h1>
-        <div className="row">
-          <div className="col-md-6">
-            <div className={this.props.style1}>
-              <div className="panel-body">
-                <h1>{this.props.base1.info.name}</h1>
-                <h2>{this.props.price1} {this.props.quote1.info.symbol}</h2>
-                <div className="text-center">
-                  <Link to={'/market/' + this.props.address1} className="btn btn-info">market</Link>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className={this.props.style2}>
-              <div className="panel-body">
-                <h1>{this.props.base2.info.name}</h1>
-                <h2>{this.props.price2} {this.props.quote2.info.symbol}</h2>
-                <div className="text-center">
-                  <Link to={'/market/' + this.props.address2} className="btn btn-info">market</Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <Ivideon />
+        <h1>Фьючерсные рынки</h1>
+        <Main
+          address1={this.props.address1}
+          price1={this.props.price1}
+          style1={this.props.style1}
+          base1={this.props.base1}
+          quote1={this.props.quote1}
+          address2={this.props.address2}
+          price2={this.props.price2}
+          style2={this.props.style2}
+          base2={this.props.base2}
+          quote2={this.props.quote2}
+        />
         <Youtube />
+        <h2>История</h2>
+        <Log rows={this.props.log} />
       </div>
     </div>)
   }
+}
+
+function getLogs(history, address1, address2) {
+  const log = [];
+  let currentType = null;
+  let currentPrice = null;
+  const pricesLast = {
+    [address1]: 0,
+    [address2]: 0,
+  }
+  const markets = {
+    [address1]: ['A', 'B'],
+    [address2]: ['B', 'А'],
+  }
+  _.forEach(history, (item) => {
+    let row = timeConverter(item.time) + ' Цена фьючерса рынка ' + markets[item.type][0];
+    let dir = 'растет';
+    if (item.price < pricesLast[item.type]) {
+      dir = 'снижается';
+    }
+    if (item.type !== currentType && item.price > currentPrice) {
+      dir = 'превысила цену фьючерса Рынка ' + markets[item.type][1];
+    }
+    pricesLast[item.type] = item.price;
+    row += ' ' + dir + '!'
+    if (item.type !== currentType && item.price > currentPrice) {
+      currentType = item.type;
+      row += ' Рынок ' + markets[address1][0] + ': ' + pricesLast[address1] + ' AIR vs Рынок ' + markets[address2][0] + ': ' + pricesLast[address2] + ' AIR. Робопоезд сменил направление движения на круг ' + markets[currentType][0] + '.';
+    } else {
+      row += ' Последняя покупка: ' + item.price + ' AIR. Робопоезд продолжает движение по кругу ' + markets[currentType][0] + '.';
+    }
+    if (item.type === currentType) {
+      currentPrice = item.price;
+    }
+    log.push(row);
+  });
+  return log;
 }
 
 function mapStateToProps(state) {
@@ -118,6 +148,7 @@ function mapStateToProps(state) {
     style1 = 'panel panel-info'
     style2 = 'panel panel-info'
   }
+  const log = getLogs(state.history.items, address1, address2).slice(0, 20)
   return {
     address1,
     address2,
@@ -128,17 +159,20 @@ function mapStateToProps(state) {
     price1,
     price2,
     style1,
-    style2
+    style2,
+    log
   }
 }
 function mapDispatchToProps(dispatch) {
   const actions = bindActionCreators({
     loadModule,
-    loadLastPrice
+    loadLastPrice,
+    load
   }, dispatch)
   return {
     loadModule: actions.loadModule,
-    loadLastPrice: actions.loadLastPrice
+    loadLastPrice: actions.loadLastPrice,
+    load: actions.load
   }
 }
 

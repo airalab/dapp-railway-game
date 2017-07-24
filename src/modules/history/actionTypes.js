@@ -1,0 +1,1 @@
+export const SET_HISTORY = 'HISTORY_SET_HISTORY'

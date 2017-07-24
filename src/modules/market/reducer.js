@@ -5,7 +5,7 @@ const initialState = {
   modules: {},
 }
 
-export default function estimator(state = initialState, action) {
+export default function market(state = initialState, action) {
   switch (action.type) {
     case LOAD: {
       const modules = { ...state.modules }

@@ -38,31 +38,7 @@ class Buy extends Component {
               <button type="submit" className="btn btn-default">Buy</button>
             </div>
           )
-          currentApprove = (
-            <div className="text-success" style={{ marginBottom: 10 }}>
-              <span className="fa fa-check" /> current approve: <b>{this.props.approve} {this.props.quote.info.symbol}</b>
-            </div>
-          )
         } else {
-          btn = (
-            <div>
-              <span>Sum &asymp; {approve[2]}</span>
-              &nbsp;
-              <button
-                className="btn btn-warning"
-                onClick={(e) => {
-                  this.props.onApprove(
-                    this.props.token,
-                    this.props.address,
-                    approve[1]
-                  );
-                  e.preventDefault();
-                }}
-              >
-                Approve {approve[1]} {this.props.quote.info.symbol}
-              </button>
-            </div>
-          )
           currentApprove = (
             <div className="text-warning" style={{ marginBottom: 10 }}>
               <span className="fa fa-exclamation" /> current approve: <b>{this.props.approve} {this.props.quote.info.symbol}</b>
