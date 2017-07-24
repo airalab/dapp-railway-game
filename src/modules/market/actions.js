@@ -151,7 +151,7 @@ export function loadLastPrice(address) {
     getLog(address, '0x4b5bcc2fcc61cdd6ab8b46567c95970321b41bf50984b3b38f13fc04015108ea')
       .then((result) => {
         closed = result
-        return getLog(address, '0x4b5bcc2fcc61cdd6ab8b46567c95970321b41bf50984b3b38f13fc04015108ea')
+        return getLog(address, '0xe4d55ff7be8673ff270b5b7b51fd4dec85115663575e80159581b7c75751d4ac')
       })
       .then((result) => {
         if (closed[0] > result[0]) {
