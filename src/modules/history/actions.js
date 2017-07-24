@@ -10,12 +10,12 @@ export function setHistory(log) {
   }
 }
 
-const getLog = (address) => {
+const getLog = (address, topics) => {
   const options = {
     fromBlock: 0,
     toBlock: 'latest',
     address,
-    topics: ['0xa7bec7790a90eefc51c752a274c61fa256e58e17fbfeb1340045117ada7f2f44']
+    topics: [topics],
   }
   return new Promise((resolve, reject) => {
     const filter = hett.web3.eth.filter(options);
@@ -53,13 +53,21 @@ const getBlock = hash => (
 export function load(address1, address2) {
   return (dispatch) => {
     let log = []
-    getLog(address1)
-      .then((log1) => {
-        log = log.concat(log1);
-        return getLog(address2)
+    getLog(address1, '0x4b5bcc2fcc61cdd6ab8b46567c95970321b41bf50984b3b38f13fc04015108ea') // OrderClosed
+      .then((result) => {
+        log = log.concat(result);
+        return getLog(address1, '0xe4d55ff7be8673ff270b5b7b51fd4dec85115663575e80159581b7c75751d4ac') // OrderPartial
       })
-      .then((log2) => {
-        log = log.concat(log2);
+      .then((result) => {
+        log = log.concat(result);
+        return getLog(address2, '0x4b5bcc2fcc61cdd6ab8b46567c95970321b41bf50984b3b38f13fc04015108ea') // OrderClosed
+      })
+      .then((result) => {
+        log = log.concat(result);
+        return getLog(address2, '0xe4d55ff7be8673ff270b5b7b51fd4dec85115663575e80159581b7c75751d4ac') // OrderPartial
+      })
+      .then((result) => {
+        log = log.concat(result);
         const prices = [];
         _.forEach(log, (item) => {
           prices.push(getPrice(item.type, item.id));
@@ -89,7 +97,7 @@ export function load(address1, address2) {
           }
         ))
         log = _.sortBy(log, ['time']);
-        dispatch(setHistory(_.reverse(log)));
+        dispatch(setHistory(log));
       })
   }
 }

@@ -117,28 +117,49 @@ export function loadBids(address) {
   }
 }
 
-export function loadLastPrice(address) {
-  return (dispatch) => {
-    const options = {
-      fromBlock: 0,
-      toBlock: 'latest',
-      address,
-      topics: ['0xa7bec7790a90eefc51c752a274c61fa256e58e17fbfeb1340045117ada7f2f44']
-    }
+const getLog = (address, topics) => {
+  const options = {
+    fromBlock: 0,
+    toBlock: 'latest',
+    address,
+    topics: [topics],
+  }
+  return new Promise((resolve, reject) => {
     const filter = hett.web3.eth.filter(options);
     filter.get((error, result) => {
-      if (!error) {
-        if (result.length > 0) {
-          const item = result.pop()
-          const id = parseInt(item.topics[1], 16);
-          hett.getContractByName('Market', address)
-            .then(contract => contract.call('priceOf', [id]))
-            .then((price) => {
-              dispatch(setlastPrice(address, Number(price)))
-            })
-        }
+      if (error) {
+        reject(error);
+      }
+      if (result.length > 0) {
+        const item = result.pop()
+        const id = parseInt(item.topics[1], 16);
+        hett.getContractByName('Market', address)
+          .then(contract => contract.call('priceOf', [id]))
+          .then((price) => {
+            resolve([item.blockNumber, Number(price)]);
+          })
+      } else {
+        resolve(0);
       }
     })
+  });
+}
+
+export function loadLastPrice(address) {
+  return (dispatch) => {
+    let closed
+    getLog(address, '0x4b5bcc2fcc61cdd6ab8b46567c95970321b41bf50984b3b38f13fc04015108ea')
+      .then((result) => {
+        closed = result
+        return getLog(address, '0x4b5bcc2fcc61cdd6ab8b46567c95970321b41bf50984b3b38f13fc04015108ea')
+      })
+      .then((result) => {
+        if (closed[0] > result[0]) {
+          dispatch(setlastPrice(address, closed[1]))
+        } else {
+          dispatch(setlastPrice(address, result[1]))
+        }
+      })
   }
 }
 

@@ -76,7 +76,7 @@ function getLogs(history, address1, address2) {
     }
     log.push(row);
   });
-  return log;
+  return _.reverse(log);
 }
 
 function mapStateToProps(state) {

@@ -41,7 +41,7 @@ class Buy extends Component {
         } else {
           currentApprove = (
             <div className="text-warning" style={{ marginBottom: 10 }}>
-              <span className="fa fa-exclamation" /> current approve: <b>{this.props.approve} {this.props.quote.info.symbol}</b>
+              <span className="fa fa-exclamation" /> Не хватает: <b>{approve[1]} {this.props.quote.info.symbol}</b>, доступно: <b>{this.props.approve} {this.props.quote.info.symbol}</b>
             </div>
           )
         }
