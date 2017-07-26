@@ -23,7 +23,10 @@ export const timeConverter = (timestamp) => {
   const hour = a.getHours();
   const min = a.getMinutes();
   const sec = a.getSeconds();
-  const time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
+  const time = date + ' ' + month + ' ' + year + ' ' +
+    ((hour < 10) ? '0' + hour : hour) + ':' +
+    ((min < 10) ? '0' + min : min) + ':' +
+    ((sec < 10) ? '0' + sec : sec);
   return time;
 }
 
