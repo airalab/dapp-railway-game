@@ -1,7 +1,7 @@
 import { SET_ROLE, SET_LANGUAGE } from './actionTypes'
 
 const initialState = {
-  title: 'dApp',
+  title: 'Игра “Робономика: управляй поездом”',
   role: '',
   language: 'en'
 }

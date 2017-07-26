@@ -6,6 +6,7 @@ import { flashMessage } from '../app/actions'
 import { loadModule as loadModuleToken, loadApprove, loadBalance } from '../token/actions'
 import { MARKET_DEFAULT_ADDR1, ORDER_CLOSED, ORDER_PARTIAL } from '../../config/config'
 import { getLog, getPrice, getBlock } from '../../utils/helper'
+import { reset as formReset, message as formMessage } from '../forms/actions'
 
 export function module(info) {
   return {
@@ -274,7 +275,35 @@ export function contractSend(abi, address, action, values) {
 }
 
 export function send(address, action, data) {
-  return (dispatch) => {
+  return dispatch => (
     dispatch(contractSend('Market', address, action, data))
+  )
+}
+
+export function orderLimit(address, data, formId) {
+  return (dispatch) => {
+    dispatch(send(address, 'orderLimit', data))
+      .then(() => {
+        dispatch(formReset(formId))
+        dispatch(formMessage(formId, 'Лот добавлен на рынок'))
+      })
+      .catch((e) => {
+        console.log(e);
+        return Promise.reject();
+      })
+  }
+}
+
+export function orderMarket(address, data, formId) {
+  return (dispatch) => {
+    dispatch(send(address, 'orderMarket', data))
+      .then(() => {
+        dispatch(formReset(formId))
+        dispatch(formMessage(formId, 'Операция прошла успешно'))
+      })
+      .catch((e) => {
+        console.log(e);
+        return Promise.reject();
+      })
   }
 }

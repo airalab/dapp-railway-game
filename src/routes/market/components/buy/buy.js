@@ -11,6 +11,13 @@ class Buy extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  componentWillReceiveProps(next) {
+    if (next.formInfo.reset === true) {
+      this.setState({ value: '' });
+      this.props.formReset(false);
+    }
+  }
+
   handleChange(event) {
     this.setState({ [event.target.name]: event.target.value });
   }
@@ -24,6 +31,7 @@ class Buy extends Component {
     const valid = this.props.validate(this.state);
     let error = null
     let btn = null
+    let msg = null
     let currentApprove = null
     if (this.state.value !== '') {
       if (valid) {
@@ -49,6 +57,9 @@ class Buy extends Component {
         error = <div className="alert alert-danger">Form is not filled out correctly</div>;
       }
     }
+    if (this.props.formInfo.message !== '') {
+      msg = <div className="alert alert-success">{this.props.formInfo.message}</div>;
+    }
     return (
       <div>
         <p>Buy Order <b>{this.props.base.info.name}</b></p>
@@ -62,6 +73,7 @@ class Buy extends Component {
           </div>
           {error}
           {currentApprove}
+          {msg}
           {btn}
         </form>
       </div>

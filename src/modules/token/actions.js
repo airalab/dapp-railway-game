@@ -3,6 +3,7 @@ import hett from 'hett'
 import { START_LOAD, MODULE, BALACE, APPROVE } from './actionTypes'
 import { formatDecimals } from '../../utils/helper'
 import { flashMessage } from '../app/actions'
+import { reset as formReset, message as formMessage } from '../forms/actions'
 
 export function module(info) {
   return {
@@ -139,7 +140,21 @@ export function contractSend(abi, address, action, values) {
 }
 
 export function send(address, action, data) {
-  return (dispatch) => {
+  return dispatch => (
     dispatch(contractSend('Token', address, action, data))
+  )
+}
+
+export function approve(address, data, formId) {
+  return (dispatch) => {
+    dispatch(send(address, 'approve', data))
+      .then(() => {
+        dispatch(formReset(formId))
+        dispatch(formMessage(formId, 'Новый лимит установлен'))
+      })
+      .catch((e) => {
+        console.log(e);
+        return Promise.reject();
+      })
   }
 }

@@ -1,11 +1,23 @@
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
 import hett from 'hett'
 import Approve from '../components/approve/main';
-import { send as tokenSend } from '../../../modules/token/actions';
+import { approve as tokenApprove } from '../../../modules/token/actions';
+import { add, reset } from '../../../modules/forms/actions';
+
+class ContainerApprove extends Component {
+  componentWillMount() {
+    this.props.formAdd();
+  }
+  render() {
+    return <Approve {...this.props} />
+  }
+}
 
 function mapStateToProps(state, props) {
+  const idForm = 'approve_' + props.token + '_' + props.address;
   const coinbase = hett.web3h.coinbase()
   const token = props.token
   const address = props.address
@@ -31,12 +43,21 @@ function mapStateToProps(state, props) {
       }
     }
   }
+  let formInfo = {
+    reset: false,
+    message: ''
+  }
+  if (_.has(state.forms.items, idForm)) {
+    formInfo = state.forms.items[idForm]
+  }
   return {
+    idForm,
     address,
     tokenInfo,
     token,
     approve: ap,
     balance,
+    formInfo,
     validate: (form) => {
       const v = Number(form.value);
       if (v <= 0) {
@@ -47,12 +68,17 @@ function mapStateToProps(state, props) {
   }
 }
 function mapDispatchToProps(dispatch, props) {
+  const idForm = 'approve_' + props.token + '_' + props.address;
   const actions = bindActionCreators({
-    tokenSend
+    tokenApprove,
+    add,
+    reset
   }, dispatch)
   return {
-    onSubmit: form => actions.tokenSend(props.token, 'approve', [props.address, form.value])
+    onSubmit: form => actions.tokenApprove(props.token, [props.address, form.value], idForm),
+    formAdd: () => actions.add(idForm),
+    formReset: bool => actions.reset(idForm, bool)
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Approve)
+export default connect(mapStateToProps, mapDispatchToProps)(ContainerApprove)

@@ -1,11 +1,23 @@
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
 import BigNumber from 'bignumber.js'
 import Add from '../components/sell/add';
-import { send as marketSend } from '../../../modules/market/actions';
+import { orderLimit } from '../../../modules/market/actions';
+import { add, reset } from '../../../modules/forms/actions';
+
+class Container extends Component {
+  componentWillMount() {
+    this.props.formAdd();
+  }
+  render() {
+    return <Add {...this.props} />
+  }
+}
 
 function mapStateToProps(state, props) {
+  const idForm = 'orderLimit_0_' + props.address;
   const address = props.address
   let ap = 0;
   let token;
@@ -36,7 +48,16 @@ function mapStateToProps(state, props) {
       token = base.address;
     }
   }
+  let formInfo = {
+    reset: false,
+    message: ''
+  }
+  if (_.has(state.forms.items, idForm)) {
+    formInfo = state.forms.items[idForm]
+  }
   return {
+    idForm,
+    formInfo,
     address,
     base,
     quote,
@@ -58,12 +79,17 @@ function mapStateToProps(state, props) {
   }
 }
 function mapDispatchToProps(dispatch, props) {
+  const idForm = 'orderLimit_0_' + props.address;
   const actions = bindActionCreators({
-    marketSend
+    orderLimit,
+    add,
+    reset
   }, dispatch)
   return {
-    onSubmit: form => actions.marketSend(props.address, 'orderLimit', [0, form.value, form.price])
+    onSubmit: form => actions.orderLimit(props.address, [0, form.value, form.price], idForm),
+    formAdd: () => actions.add(idForm),
+    formReset: bool => actions.reset(idForm, bool)
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Add)
+export default connect(mapStateToProps, mapDispatchToProps)(Container)

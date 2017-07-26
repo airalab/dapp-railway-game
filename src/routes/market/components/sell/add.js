@@ -12,6 +12,13 @@ class Add extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  componentWillReceiveProps(next) {
+    if (next.formInfo.reset === true) {
+      this.setState({ value: '', price: '' });
+      this.props.formReset(false);
+    }
+  }
+
   handleChange(event) {
     this.setState({ [event.target.name]: event.target.value });
   }
@@ -25,6 +32,7 @@ class Add extends Component {
     const valid = this.props.validate(this.state);
     let error = null
     let btn = null
+    let msg = null
     let currentApprove = null
     if (this.state.value !== '' && this.state.price !== '') {
       if (valid) {
@@ -41,6 +49,9 @@ class Add extends Component {
       } else {
         error = <div className="alert alert-danger">Form is not filled out correctly</div>;
       }
+    }
+    if (this.props.formInfo.message !== '') {
+      msg = <div className="alert alert-success">{this.props.formInfo.message}</div>;
     }
     return (
       <div>
@@ -62,6 +73,7 @@ class Add extends Component {
           </div>
           {error}
           {currentApprove}
+          {msg}
           {btn}
         </form>
       </div>

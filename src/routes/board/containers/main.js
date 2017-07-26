@@ -21,6 +21,18 @@ class Container extends Component {
   render() {
     return (<div>
       <div>
+        <p>
+          Airalab разработали игру “Робономика: управляй поездом с помощью AIR токенов” для
+          демонстрации инвесторам возможностей управления полностью автоматизированными
+          предприятиями с использованием исключительно капитала - AIR токена.
+        </p>
+        <blockquote>
+          <p>
+            <span className="text-warning">Внимание!</span> игра использует тестовую сеть
+            KOVAN. Не отправляйте транзакции в основной Ethereum Blockchain. Чтобы получить
+            тестовые AIR токены прочитайте раздел ниже “Как получить тестовые AIR токены”
+          </p>
+        </blockquote>
         <h1>Фьючерсные рынки</h1>
         <Main
           address1={this.props.address1}
@@ -34,6 +46,7 @@ class Container extends Component {
           base2={this.props.base2}
           quote2={this.props.quote2}
         />
+        <h2>Онлайн трансляция движения поезда</h2>
         <Youtube />
         <h2>История</h2>
         <Log rows={this.props.log} />
