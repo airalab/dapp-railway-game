@@ -2,7 +2,7 @@ import Notifications from 'react-notification-system-redux';
 import i18next from 'i18next'
 import { SET_ROLE, SET_LANGUAGE } from './actionTypes'
 
-export function flashMessage(message, type = 'info') {
+export function flashMessage(message, type = 'info', isSave = false) {
   return (dispatch) => {
     const notificationOpts = {
       // title: 'Hey, it\'s good to see you!',
@@ -14,6 +14,9 @@ export function flashMessage(message, type = 'info') {
       dispatch(Notifications.error(notificationOpts))
     } else {
       dispatch(Notifications.info(notificationOpts))
+    }
+    if (isSave) {
+      console.log(message);
     }
   }
 }

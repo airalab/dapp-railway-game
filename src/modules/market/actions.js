@@ -4,6 +4,8 @@ import hett from 'hett'
 import { LOAD, MODULE, SET_ASKS_ORDERS, SET_BIDS_ORDERS, SET_LAST_PRICE } from './actionTypes'
 import { flashMessage } from '../app/actions'
 import { loadModule as loadModuleToken, loadApprove, loadBalance } from '../token/actions'
+import { MARKET_DEFAULT_ADDR1, ORDER_CLOSED, ORDER_PARTIAL } from '../../config/config'
+import { getLog, getPrice, getBlock } from '../../utils/helper'
 
 export function module(info) {
   return {
@@ -117,48 +119,47 @@ export function loadBids(address) {
   }
 }
 
-const getLog = (address, topics) => {
-  const options = {
-    fromBlock: 0,
-    toBlock: 'latest',
-    address,
-    topics: [topics],
-  }
-  return new Promise((resolve, reject) => {
-    const filter = hett.web3.eth.filter(options);
-    filter.get((error, result) => {
-      if (error) {
-        reject(error);
-      }
-      if (result.length > 0) {
-        const item = result.pop()
-        const id = parseInt(item.topics[1], 16);
-        hett.getContractByName('Market', address)
-          .then(contract => contract.call('priceOf', [id]))
-          .then((price) => {
-            resolve([item.blockNumber, Number(price)]);
-          })
-      } else {
-        resolve(0);
-      }
-    })
-  });
-}
-
 export function loadLastPrice(address) {
   return (dispatch) => {
-    let closed
-    getLog(address, '0x4b5bcc2fcc61cdd6ab8b46567c95970321b41bf50984b3b38f13fc04015108ea')
+    let log = []
+    getLog(address, ORDER_CLOSED)
       .then((result) => {
-        closed = result
-        return getLog(address, '0xe4d55ff7be8673ff270b5b7b51fd4dec85115663575e80159581b7c75751d4ac')
+        log = log.concat(result);
+        return getLog(address, ORDER_PARTIAL)
       })
       .then((result) => {
-        if (closed[0] > result[0]) {
-          dispatch(setlastPrice(address, closed[1]))
-        } else {
-          dispatch(setlastPrice(address, result[1]))
-        }
+        log = log.concat(result);
+        const prices = [];
+        _.forEach(log, (item) => {
+          prices.push(getPrice(item.type, item.id));
+        })
+        return Promise.all(prices)
+      })
+      .then((prices) => {
+        log = _.map(log, (item, i) => (
+          {
+            ...item,
+            price: prices[i]
+          }
+        ))
+      })
+      .then(() => {
+        const blocks = [];
+        _.forEach(log, (item) => {
+          blocks.push(getBlock(item.blockNumber));
+        })
+        return Promise.all(blocks)
+      })
+      .then((blocks) => {
+        log = _.map(log, (item, i) => (
+          {
+            ...item,
+            time: blocks[i]
+          }
+        ))
+        log = _.orderBy(log, ['time', 'logIndex'], ['asc', 'desc']);
+        const item = log.pop()
+        dispatch(setlastPrice(address, item.price))
       })
   }
 }
@@ -172,21 +173,28 @@ export function events(address) {
     isEvents[address] = true;
     hett.getContractByName('Market', address)
       .then((contract) => {
-        contract.listen('OrderOpened', (result) => {
-          console.log('OrderOpened', result);
-          dispatch(flashMessage(
-            'OrderOpened: ' + Number(result.order)
-          ))
-        })
         contract.listen('OrderClosed', (result) => {
-          console.log('OrderClosed', result);
-          dispatch(flashMessage(
-            'OrderClosed: ' + Number(result.order)
-          ))
           const id = Number(result.order)
           contract.call('priceOf', [id])
             .then((price) => {
               dispatch(setlastPrice(address, Number(price)))
+              dispatch(flashMessage(
+                'На рынке ' + (MARKET_DEFAULT_ADDR1 === address ? 'A' : 'B') + ' закрылся лот по цене ' + Number(price) + ' AIR',
+                'info',
+                true
+              ))
+            })
+        })
+        contract.listen('OrderPartial', (result) => {
+          const id = Number(result.order)
+          contract.call('priceOf', [id])
+            .then((price) => {
+              dispatch(setlastPrice(address, Number(price)))
+              dispatch(flashMessage(
+                'На рынке ' + (MARKET_DEFAULT_ADDR1 === address ? 'A' : 'B') + ' частично закрылся лот по цене ' + Number(price) + ' AIR',
+                'info',
+                true
+              ))
             })
         })
       })

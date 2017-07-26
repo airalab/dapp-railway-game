@@ -134,3 +134,45 @@ export const validate = (values, props) => {
   })
   return errors
 };
+
+export const getLog = (address, topics) => {
+  const options = {
+    fromBlock: 0,
+    toBlock: 'latest',
+    address,
+    topics: [topics],
+  }
+  return new Promise((resolve, reject) => {
+    const filter = hett.web3.eth.filter(options);
+    filter.get((error, result) => {
+      if (error) {
+        reject(error);
+      }
+      const log = []
+      if (result.length > 0) {
+        _.forEach(result, (value) => {
+          const id = parseInt(value.topics[1], 16)
+          log.push({
+            blockNumber: value.blockNumber,
+            type: address,
+            logIndex: value.logIndex,
+            // transactionHash: value.transactionHash,
+            id
+          })
+        })
+      }
+      resolve(log);
+    })
+  });
+}
+
+export const getPrice = (address, id) => (
+  hett.getContractByName('Market', address)
+    .then(contract => contract.call('priceOf', [id]))
+    .then(price => Number(price))
+)
+
+export const getBlock = hash => (
+  hett.web3h.getBlock(hash)
+    .then(item => item.timestamp)
+)

@@ -44,7 +44,7 @@ class Add extends Component {
     }
     return (
       <div>
-        <p>Sell <b>{this.props.base.info.name}</b></p>
+        <p>Add sell <b>{this.props.base.info.name}</b></p>
         <form onSubmit={this.handleSubmit}>
           <div className="form-group">
             <span className="control-label">value:</span>

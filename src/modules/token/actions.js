@@ -90,12 +90,24 @@ export function loadModule(address) {
         Promise.join(
           contract.call('name'),
           contract.call('symbol'),
-          (...info) => (
-            {
-              name: info[0],
-              symbol: info[1]
+          (...info) => {
+            let name = info[0]
+            if (info[0] === 'My Robometrics') {
+              name = 'FUTURES A';
+            } else if (info[0] === 'My Robometrics2') {
+              name = 'FUTURES B';
             }
-          )
+            let symbol = info[1]
+            if (info[1] === 'MRM') {
+              symbol = 'FUTURES A';
+            } else if (info[1] === 'MR2') {
+              symbol = 'FUTURES B';
+            }
+            return {
+              name,
+              symbol
+            }
+          }
         )
       ))
       .then((info) => {
