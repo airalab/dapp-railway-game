@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
 import i18next from 'i18next'
+import { translate, Interpolate } from 'react-i18next';
 import { MARKET_DEFAULT_ADDR1, MARKET_DEFAULT_ADDR2 } from '../../../config/config'
 import { Main } from '../components/main'
 import { Youtube } from '../components/video'
@@ -24,7 +25,7 @@ class Container extends Component {
       <div>
         <p>{i18next.t('appDesc')}</p>
         <blockquote>
-          <p>{i18next.t('appNotice')}</p>
+          <Interpolate parent={'p'} i18nKey={'common:appNotice'} useDangerouslySetInnerHTML />
         </blockquote>
         <h1>{i18next.t('title1')}</h1>
         <Main
@@ -182,4 +183,4 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Container)
+export default connect(mapStateToProps, mapDispatchToProps)(translate()(Container))
