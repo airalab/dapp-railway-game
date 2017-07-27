@@ -1,5 +1,6 @@
 import Promise from 'bluebird'
 import hett from 'hett'
+import i18next from 'i18next'
 import { START_LOAD, MODULE, BALACE, APPROVE } from './actionTypes'
 import { formatDecimals } from '../../utils/helper'
 import { flashMessage } from '../app/actions'
@@ -150,7 +151,7 @@ export function approve(address, data, formId) {
     dispatch(send(address, 'approve', data))
       .then(() => {
         dispatch(formReset(formId))
-        dispatch(formMessage(formId, 'Новый лимит установлен'))
+        dispatch(formMessage(formId, i18next.t('newLimitSuccess')))
       })
       .catch((e) => {
         console.log(e);

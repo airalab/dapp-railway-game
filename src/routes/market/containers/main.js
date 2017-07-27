@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
 import hett from 'hett'
+import i18next from 'i18next'
 import { events, loadModule } from '../../../modules/market/actions';
 import { Main as Buy } from '../components/buy';
 import { Main as Sell } from '../components/sell';
@@ -25,7 +26,7 @@ class Container extends Component {
       <div>
         <h1>Circle-market {(MARKET_DEFAULT_ADDR1 === this.props.market.address) ? 'A' : 'B'}</h1>
         <hr />
-        <p>Адрес контракта рынка: <EthLink address={this.props.market.address} /></p>
+        <p>{i18next.t('market:addressContract')}: <EthLink address={this.props.market.address} /></p>
         <div className="row">
           <div className="col-md-6">
             <div className="panel panel-default">
@@ -68,14 +69,14 @@ class Container extends Component {
             <Sell address={this.props.market.address} />
           </div>
         </div>
-        <h2>Информация о рынке</h2>
+        <h2>{i18next.t('market:titleLots')}</h2>
         <div className="row">
           <div className="col-md-6">
-            <h3>Ордера на продажу</h3>
+            <h3>{i18next.t('market:titleOrdersSell')}</h3>
             <Bids address={this.props.market.address} />
           </div>
           <div className="col-md-6">
-            <h3>Ордера на покупку</h3>
+            <h3>{i18next.t('market:titleOrdersBuy')}</h3>
             <Asks address={this.props.market.address} />
           </div>
         </div>
@@ -123,6 +124,7 @@ function mapStateToProps(state, props) {
     }
   }
   return {
+    language: state.app.language,
     market,
     base,
     quote,

@@ -1,4 +1,5 @@
 import React from 'react'
+import i18next from 'i18next'
 import { timeConverter } from '../../../../utils/helper'
 
 const Main = props => (
@@ -7,9 +8,9 @@ const Main = props => (
       <table className="table table-hover">
         <thead>
           <tr>
-            <th>price</th>
-            <th>value</th>
-            <th>stamp</th>
+            <th>{i18next.t('market:price')}</th>
+            <th>{i18next.t('market:value')}</th>
+            <th>{i18next.t('market:time')}</th>
           </tr>
         </thead>
         <tbody>

@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import i18next from 'i18next'
 
 class Add extends Component {
   constructor(props) {
@@ -34,9 +35,9 @@ class Add extends Component {
     let msg = null
     if (this.state.value !== '') {
       if (valid) {
-        btn = <button type="submit" className="btn btn-default">Подтвердить</button>
+        btn = <button type="submit" className="btn btn-default">{i18next.t('market:submit')}</button>
       } else {
-        error = <div className="alert alert-danger">Form is not filled out correctly</div>;
+        error = <div className="alert alert-danger">{i18next.t('market:formErrMsg')}</div>;
       }
     }
     if (this.props.formInfo.message !== '') {
@@ -45,15 +46,15 @@ class Add extends Component {
     return (
       <div>
         <p>
-          Баланс токенов: <b>{this.props.balance} {this.props.tokenInfo.info.symbol}</b>
+          {i18next.t('market:balanceTokens')}: <b>{this.props.balance} {this.props.tokenInfo.info.symbol}</b>
         </p>
         <p>
-          Разрешено для торговли: <b>{this.props.approve} {this.props.tokenInfo.info.symbol}</b>
+          {i18next.t('market:approveBalance')}: <b>{this.props.approve} {this.props.tokenInfo.info.symbol}</b>
         </p>
-        <p>Укажите новый лимит для торговли:</p>
+        <p>{i18next.t('market:newLimit')}:</p>
         <form onSubmit={this.handleSubmit}>
           <div className="form-group">
-            <span className="control-label">количество:</span>
+            <span className="control-label">{i18next.t('market:newLimitValue')}:</span>
             <div className="input-group">
               <input value={this.state.value} onChange={this.handleChange} name="value" type="text" className="form-control form-control-b" />
               <div className="input-group-addon">{this.props.tokenInfo.info.symbol}</div>

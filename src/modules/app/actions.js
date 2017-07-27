@@ -1,6 +1,9 @@
 import Notifications from 'react-notification-system-redux';
 import i18next from 'i18next'
-import { SET_ROLE, SET_LANGUAGE } from './actionTypes'
+import { Cookies } from 'react-cookie'
+import { SET_LANGUAGE } from './actionTypes'
+
+const cookies = new Cookies();
 
 export function flashMessage(message, type = 'info', isSave = false) {
   return (dispatch) => {
@@ -21,15 +24,9 @@ export function flashMessage(message, type = 'info', isSave = false) {
   }
 }
 
-export function setRole(role) {
-  return {
-    type: SET_ROLE,
-    payload: role
-  }
-}
-
 export function setLanguage(language) {
   i18next.changeLanguage(language)
+  cookies.set('language', language);
   return {
     type: SET_LANGUAGE,
     payload: language

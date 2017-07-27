@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
+import i18next from 'i18next'
 import { MARKET_DEFAULT_ADDR1, MARKET_DEFAULT_ADDR2 } from '../../../config/config'
 import { Main } from '../components/main'
 import { Youtube } from '../components/video'
@@ -21,19 +22,11 @@ class Container extends Component {
   render() {
     return (<div>
       <div>
-        <p>
-          Airalab разработали игру “Робономика: управляй поездом с помощью AIR токенов” для
-          демонстрации инвесторам возможностей управления полностью автоматизированными
-          предприятиями с использованием исключительно капитала - AIR токена.
-        </p>
+        <p>{i18next.t('appDesc')}</p>
         <blockquote>
-          <p>
-            <span className="text-warning">Внимание!</span> игра использует тестовую сеть
-            KOVAN. Не отправляйте транзакции в основной Ethereum Blockchain. Чтобы получить
-            тестовые AIR токены прочитайте раздел ниже “Как получить тестовые AIR токены”
-          </p>
+          <p>{i18next.t('appNotice')}</p>
         </blockquote>
-        <h1>Фьючерсные рынки</h1>
+        <h1>{i18next.t('title1')}</h1>
         <Main
           address1={this.props.address1}
           price1={this.props.price1}
@@ -46,9 +39,9 @@ class Container extends Component {
           base2={this.props.base2}
           quote2={this.props.quote2}
         />
-        <h2>Онлайн трансляция движения поезда</h2>
+        <h2>{i18next.t('title2')}</h2>
         <Youtube />
-        <h2>История</h2>
+        <h2>{i18next.t('title3')}</h2>
         <Log rows={this.props.log} />
       </div>
     </div>)
@@ -68,21 +61,21 @@ function getLogs(history, address1, address2) {
     [address2]: ['B', 'А'],
   }
   _.forEach(history, (item) => {
-    let row = timeConverter(item.time) + ' Цена фьючерса рынка ' + markets[item.type][0];
-    let dir = 'растет';
+    let row = timeConverter(item.time) + ' ' + i18next.t('history:priceFutures') + ' ' + markets[item.type][0];
+    let dir = i18next.t('history:up');
     if (item.price < pricesLast[item.type]) {
-      dir = 'снижается';
+      dir = i18next.t('history:down');
     }
     if (item.type !== currentType && item.price > currentPrice) {
-      dir = 'превысила цену фьючерса Рынка ' + markets[item.type][1];
+      dir = i18next.t('history:upPrice') + ' ' + markets[item.type][1];
     }
     pricesLast[item.type] = item.price;
     row += ' ' + dir + '!'
     if (item.type !== currentType && item.price > currentPrice) {
       currentType = item.type;
-      row += ' Рынок ' + markets[address1][0] + ': ' + pricesLast[address1] + ' AIR vs Рынок ' + markets[address2][0] + ': ' + pricesLast[address2] + ' AIR. Робопоезд сменил направление движения на круг ' + markets[currentType][0] + '.';
+      row += ' ' + i18next.t('history:market') + ' ' + markets[address1][0] + ': ' + pricesLast[address1] + ' AIR vs ' + i18next.t('history:market') + ' ' + markets[address2][0] + ': ' + pricesLast[address2] + ' AIR. ' + i18next.t('history:changeDir') + ' ' + markets[currentType][0] + '.';
     } else {
-      row += ' Последняя покупка: ' + item.price + ' AIR. Робопоезд продолжает движение по кругу ' + markets[currentType][0] + '.';
+      row += ' ' + i18next.t('history:lastOrder') + ': ' + item.price + ' AIR. ' + i18next.t('history:sameDir') + ' ' + markets[currentType][0] + '.';
     }
     if (item.type === currentType) {
       currentPrice = item.price;

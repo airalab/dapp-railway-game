@@ -1,6 +1,7 @@
 import Promise from 'bluebird'
 import _ from 'lodash'
 import hett from 'hett'
+import i18next from 'i18next'
 import { LOAD, MODULE, SET_ASKS_ORDERS, SET_BIDS_ORDERS, SET_LAST_PRICE } from './actionTypes'
 import { flashMessage } from '../app/actions'
 import { loadModule as loadModuleToken, loadApprove, loadBalance } from '../token/actions'
@@ -180,7 +181,7 @@ export function events(address) {
             .then((price) => {
               dispatch(setlastPrice(address, Number(price)))
               dispatch(flashMessage(
-                'На рынке ' + (MARKET_DEFAULT_ADDR1 === address ? 'A' : 'B') + ' закрылся лот по цене ' + Number(price) + ' AIR',
+                i18next.t('market:closeOrderPrice', { market: (MARKET_DEFAULT_ADDR1 === address ? 'A' : 'B'), price: Number(price) + ' AIR' }),
                 'info',
                 true
               ))
@@ -192,7 +193,7 @@ export function events(address) {
             .then((price) => {
               dispatch(setlastPrice(address, Number(price)))
               dispatch(flashMessage(
-                'На рынке ' + (MARKET_DEFAULT_ADDR1 === address ? 'A' : 'B') + ' частично закрылся лот по цене ' + Number(price) + ' AIR',
+                i18next.t('market:partialOrderPrice', { market: (MARKET_DEFAULT_ADDR1 === address ? 'A' : 'B'), price: Number(price) + ' AIR' }),
                 'info',
                 true
               ))
@@ -285,7 +286,7 @@ export function orderLimit(address, data, formId) {
     dispatch(send(address, 'orderLimit', data))
       .then(() => {
         dispatch(formReset(formId))
-        dispatch(formMessage(formId, 'Лот добавлен на рынок'))
+        dispatch(formMessage(formId, i18next.t('market:newLotSuccess')))
       })
       .catch((e) => {
         console.log(e);
@@ -299,7 +300,7 @@ export function orderMarket(address, data, formId) {
     dispatch(send(address, 'orderMarket', data))
       .then(() => {
         dispatch(formReset(formId))
-        dispatch(formMessage(formId, 'Операция прошла успешно'))
+        dispatch(formMessage(formId, i18next.t('market:opSuccess')))
       })
       .catch((e) => {
         console.log(e);

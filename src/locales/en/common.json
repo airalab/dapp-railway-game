@@ -1,3 +1,9 @@
 {
-  "user": "User"
+  "appTitle": "Game “Robonomics: control the train”",
+  "appDesc": "Airalab has designed the game “Robonomics: control the train through AIR tokens” to illustrate the investors the opportunities of controlling a “lights-out” manufacturing by means of nothing but the capital which is our dear and beloved AIR token.",
+  "appNotice": "Heads up: the game uses the test network KOVAN. Don’t send transactions to the main Ethereum Blockchain. To obtain test AIR tokens read the section below “How test AIR tokens can be got”",
+  "title1": "Futures market",
+  "title2": "The train traffic online broadcasting",
+  "title3": "History",
+  "newLimitSuccess": "A new limit is set"
 }

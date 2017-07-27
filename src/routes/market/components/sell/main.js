@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import i18next from 'i18next'
 import Add from '../../containers/addSell';
 import Sell from '../../containers/orderSell';
 
@@ -23,7 +24,7 @@ class Main extends Component {
   render() {
     return (
       <div className="panel panel-default">
-        <div className="panel-heading"><h4 className="panel-title">Sell</h4></div>
+        <div className="panel-heading"><h4 className="panel-title">{i18next.t('market:sell')}</h4></div>
         <div className="panel-body">
           <div className="checkbox" style={{ marginLeft: 20, marginBottom: 15 }}>
             <span>
@@ -32,7 +33,7 @@ class Main extends Component {
                 type="checkbox"
                 checked={this.state.isAdd}
                 onChange={this.handleChange}
-              /> Add order market?
+              /> {i18next.t('market:addOrderMarket')}
             </span>
           </div>
           {this.state.isAdd ?

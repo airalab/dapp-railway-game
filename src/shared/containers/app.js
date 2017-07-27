@@ -1,29 +1,24 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
+import { Cookies } from 'react-cookie'
 import Notifications from 'react-notification-system-redux';
-import { PROGRAMMS } from '../../config/config'
+import i18next from 'i18next'
 
 import Header from '../components/app/header'
 import Footer from '../components/app/footer'
-import { flashMessage, setDaoAddress, setLanguage } from '../../modules/app/actions';
+import { flashMessage, setLanguage } from '../../modules/app/actions';
 
 import './style.css'
 
-// @translate(['view', 'nav'], { wait: true })
 class App extends Component {
   componentWillMount() {
-    // const language = cookies.get('language')
-    // if (language) {
-    //   this.props.setLanguage(language)
-    // }
+    const cookies = new Cookies();
+    const language = cookies.get('language')
+    if (language) {
+      this.props.setLanguage(language)
+    }
   }
-
-  // componentWillReceiveProps(next) {
-  //   if (this.props.dao_address !== next.dao_address) {
-  //     this.props.loadCore(next.dao_address);
-  //   }
-  // }
 
   render() {
     const style = {
@@ -41,12 +36,8 @@ class App extends Component {
     return (<div>
       <Header
         title={this.props.title}
-        dao_address={this.props.dao_address}
-        role={this.props.role}
         language={this.props.language}
         setLanguage={this.props.setLanguage}
-        programms={this.props.programms}
-        setDaoAddress={this.props.setDaoAddress}
       />
       <div className="container" id="maincontainer">
         {this.props.children}
@@ -63,23 +54,18 @@ class App extends Component {
 
 function mapStateToProps(state) {
   return {
-    title: state.app.title,
-    dao_address: state.app.dao_address,
-    role: state.app.role,
+    title: i18next.t('appTitle'),
     language: state.app.language,
-    programms: PROGRAMMS,
     notifications: state.notifications,
   }
 }
 function mapDispatchToProps(dispatch) {
   const actions = bindActionCreators({
     flashMessage,
-    setDaoAddress,
     setLanguage,
   }, dispatch)
   return {
     flashMessage: actions.flashMessage,
-    setDaoAddress: actions.setDaoAddress,
     setLanguage: actions.setLanguage,
   }
 }
