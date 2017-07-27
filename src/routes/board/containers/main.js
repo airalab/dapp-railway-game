@@ -6,12 +6,14 @@ import i18next from 'i18next'
 import { translate, Interpolate } from 'react-i18next';
 import { MARKET_DEFAULT_ADDR1, MARKET_DEFAULT_ADDR2 } from '../../../config/config'
 import { Main } from '../components/main'
-import { Youtube } from '../components/video'
+// import { Youtube } from '../components/video'
 import { Main as Log } from '../components/log'
 import { loadModule, loadLastPrice } from '../../../modules/market/actions';
 import { load } from '../../../modules/history/actions';
 import { timeConverter } from '../../../utils/helper'
 
+// <h2>{i18next.t('title2')}</h2>
+// <Youtube />
 class Container extends Component {
   componentWillMount() {
     this.props.loadModule(this.props.address1);
@@ -40,8 +42,6 @@ class Container extends Component {
           base2={this.props.base2}
           quote2={this.props.quote2}
         />
-        <h2>{i18next.t('title2')}</h2>
-        <Youtube />
         <h2>{i18next.t('title3')}</h2>
         <Log rows={this.props.log} />
       </div>
