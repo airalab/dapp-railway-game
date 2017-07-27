@@ -1,0 +1,10 @@
+{
+  "priceFutures": "The futures price of the market",
+  "up": "is growing",
+  "down": "is declining",
+  "upPrice": "climbed above the market",
+  "market": "Market",
+  "changeDir": "The robot-train changed the direction of its movement and is gong to the circle",
+  "lastOrder": "The latest transaction",
+  "sameDir": "The robot-train is going on moving in the circle"
+}
