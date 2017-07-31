@@ -27,7 +27,8 @@ const notAccounts = () => {
 const loader = () => {
   render(
     <div className="container" id="maincontainer">
-      <p>...</p>
+      <p>[ENG] Please wait while DApp is loading</p>
+      <p>[RUS] Пожалуйста подождите пока приложение загружается</p>
     </div>,
     document.getElementById('root')
   )
