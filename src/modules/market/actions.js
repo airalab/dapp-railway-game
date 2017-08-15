@@ -2,12 +2,12 @@ import Promise from 'bluebird'
 import _ from 'lodash'
 import hett from 'hett'
 import i18next from 'i18next'
+import { actions as actionsForm } from 'vol4-form'
 import { LOAD, MODULE, SET_ASKS_ORDERS, SET_BIDS_ORDERS, SET_LAST_PRICE } from './actionTypes'
 import { flashMessage } from '../app/actions'
 import { loadModule as loadModuleToken, loadApprove, loadBalance } from '../token/actions'
 import { MARKET_DEFAULT_ADDR1, ORDER_CLOSED, ORDER_PARTIAL } from '../../config/config'
 import { getLog, getPrice, getBlock } from '../../utils/helper'
-import { reset as formReset, message as formMessage } from '../forms/actions'
 
 export function module(info) {
   return {
@@ -283,10 +283,11 @@ export function send(address, action, data) {
 
 export function orderLimit(address, data, formId) {
   return (dispatch) => {
+    dispatch(actionsForm.start(formId));
     dispatch(send(address, 'orderLimit', data))
       .then(() => {
-        dispatch(formReset(formId))
-        dispatch(formMessage(formId, i18next.t('market:newLotSuccess')))
+        dispatch(actionsForm.stop(formId));
+        dispatch(actionsForm.success(formId, i18next.t('market:newLotSuccess')));
       })
       .catch((e) => {
         console.log(e);
@@ -297,10 +298,11 @@ export function orderLimit(address, data, formId) {
 
 export function orderMarket(address, data, formId) {
   return (dispatch) => {
+    dispatch(actionsForm.start(formId));
     dispatch(send(address, 'orderMarket', data))
       .then(() => {
-        dispatch(formReset(formId))
-        dispatch(formMessage(formId, i18next.t('market:opSuccess')))
+        dispatch(actionsForm.stop(formId));
+        dispatch(actionsForm.success(formId, i18next.t('market:opSuccess')));
       })
       .catch((e) => {
         console.log(e);

@@ -1,20 +1,18 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
 import BigNumber from 'bignumber.js'
+import { Form } from 'vol4-form'
+import i18next from 'i18next'
 import Buy from '../components/buy/buy';
 import { orderMarket } from '../../../modules/market/actions';
-import { add, reset } from '../../../modules/forms/actions';
 
-class Container extends Component {
-  componentWillMount() {
-    this.props.formAdd();
-  }
-  render() {
-    return <Buy {...this.props} />
-  }
-}
+const Container = props => (
+  <Form id={props.idForm} {...props} onSubmit={props.onSubmit}>
+    <Buy />
+  </Form>
+)
 
 function mapStateToProps(state, props) {
   const idForm = 'orderMarket_1_' + props.address;
@@ -56,27 +54,25 @@ function mapStateToProps(state, props) {
       orders = _.sortBy(market.bids, ['price'])
     }
   }
-  let formInfo = {
-    reset: false,
-    message: ''
-  }
-  if (_.has(state.forms.items, idForm)) {
-    formInfo = state.forms.items[idForm]
-  }
   return {
     idForm,
-    formInfo,
     address,
     base,
     quote,
     token,
     approve: ap,
-    validate: (form) => {
-      const v = Number(form.value);
-      if (v <= 0) {
-        return false;
+    fields: {
+      value: {
+        value: '',
+        type: 'text',
       }
-      return true;
+    },
+    onValidate: (form) => {
+      const errors = {}
+      if (Number(form.value) <= 0) {
+        errors.value = i18next.t('market:formErrMsg')
+      }
+      return errors;
     },
     calcApprove: (v) => {
       const allowance = new BigNumber(ap);
@@ -104,13 +100,9 @@ function mapDispatchToProps(dispatch, props) {
   const idForm = 'orderMarket_1_' + props.address;
   const actions = bindActionCreators({
     orderMarket,
-    add,
-    reset
   }, dispatch)
   return {
     onSubmit: form => actions.orderMarket(props.address, [1, form.value], idForm),
-    formAdd: () => actions.add(idForm),
-    formReset: bool => actions.reset(idForm, bool)
   }
 }
 

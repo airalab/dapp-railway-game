@@ -1,20 +1,18 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
 import hett from 'hett'
+import { Form } from 'vol4-form'
+import i18next from 'i18next'
 import Approve from '../components/approve/main';
 import { approve as tokenApprove } from '../../../modules/token/actions';
-import { add, reset } from '../../../modules/forms/actions';
 
-class ContainerApprove extends Component {
-  componentWillMount() {
-    this.props.formAdd();
-  }
-  render() {
-    return <Approve {...this.props} />
-  }
-}
+const ContainerApprove = props => (
+  <Form id={props.idForm} {...props} onSubmit={props.onSubmit}>
+    <Approve />
+  </Form>
+)
 
 function mapStateToProps(state, props) {
   const idForm = 'approve_' + props.token + '_' + props.address;
@@ -43,13 +41,6 @@ function mapStateToProps(state, props) {
       }
     }
   }
-  let formInfo = {
-    reset: false,
-    message: ''
-  }
-  if (_.has(state.forms.items, idForm)) {
-    formInfo = state.forms.items[idForm]
-  }
   return {
     idForm,
     address,
@@ -57,27 +48,28 @@ function mapStateToProps(state, props) {
     token,
     approve: ap,
     balance,
-    formInfo,
-    validate: (form) => {
-      const v = Number(form.value);
-      if (v <= 0) {
-        return false;
+    fields: {
+      value: {
+        value: '',
+        type: 'text',
       }
-      return true;
+    },
+    onValidate: (form) => {
+      const errors = {}
+      if (Number(form.value) <= 0) {
+        errors.value = i18next.t('market:formErrMsg')
+      }
+      return errors;
     }
   }
 }
 function mapDispatchToProps(dispatch, props) {
   const idForm = 'approve_' + props.token + '_' + props.address;
   const actions = bindActionCreators({
-    tokenApprove,
-    add,
-    reset
+    tokenApprove
   }, dispatch)
   return {
-    onSubmit: form => actions.tokenApprove(props.token, [props.address, form.value], idForm),
-    formAdd: () => actions.add(idForm),
-    formReset: bool => actions.reset(idForm, bool)
+    onSubmit: form => actions.tokenApprove(props.token, [props.address, form.value], idForm)
   }
 }
 

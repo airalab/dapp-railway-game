@@ -1,10 +1,10 @@
 import Promise from 'bluebird'
 import hett from 'hett'
 import i18next from 'i18next'
+import { actions as actionsForm } from 'vol4-form'
 import { START_LOAD, MODULE, BALACE, APPROVE } from './actionTypes'
 import { formatDecimals } from '../../utils/helper'
 import { flashMessage } from '../app/actions'
-import { reset as formReset, message as formMessage } from '../forms/actions'
 
 export function module(info) {
   return {
@@ -148,10 +148,11 @@ export function send(address, action, data) {
 
 export function approve(address, data, formId) {
   return (dispatch) => {
+    dispatch(actionsForm.start(formId));
     dispatch(send(address, 'approve', data))
       .then(() => {
-        dispatch(formReset(formId))
-        dispatch(formMessage(formId, i18next.t('newLimitSuccess')))
+        dispatch(actionsForm.stop(formId));
+        dispatch(actionsForm.success(formId, i18next.t('newLimitSuccess')));
       })
       .catch((e) => {
         console.log(e);

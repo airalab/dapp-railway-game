@@ -4664,6 +4664,12 @@ vm-browserify@0.0.4:
   dependencies:
     indexof "0.0.1"
 
+vol4-form@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/vol4-form/-/vol4-form-0.1.0.tgz#92f38fb4b39e106e04c173c9ad4a335db0f5c723"
+  dependencies:
+    lodash "^4.17.4"
+
 warning@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/warning/-/warning-3.0.0.tgz#32e5377cb572de4ab04753bdf8821c01ed605b7c"

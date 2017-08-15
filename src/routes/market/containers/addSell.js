@@ -1,20 +1,18 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
 import BigNumber from 'bignumber.js'
+import { Form } from 'vol4-form'
+import i18next from 'i18next'
 import Add from '../components/sell/add';
 import { orderLimit } from '../../../modules/market/actions';
-import { add, reset } from '../../../modules/forms/actions';
 
-class Container extends Component {
-  componentWillMount() {
-    this.props.formAdd();
-  }
-  render() {
-    return <Add {...this.props} />
-  }
-}
+const Container = props => (
+  <Form id={props.idForm} {...props} onSubmit={props.onSubmit}>
+    <Add />
+  </Form>
+)
 
 function mapStateToProps(state, props) {
   const idForm = 'orderLimit_0_' + props.address;
@@ -48,28 +46,32 @@ function mapStateToProps(state, props) {
       token = base.address;
     }
   }
-  let formInfo = {
-    reset: false,
-    message: ''
-  }
-  if (_.has(state.forms.items, idForm)) {
-    formInfo = state.forms.items[idForm]
-  }
   return {
     idForm,
-    formInfo,
     address,
     base,
     quote,
     token,
     approve: ap,
-    validate: (form) => {
-      const v = Number(form.value);
-      const p = Number(form.price);
-      if (v <= 0 || p <= 0) {
-        return false;
+    fields: {
+      value: {
+        value: '',
+        type: 'text',
+      },
+      price: {
+        value: '',
+        type: 'text',
       }
-      return true;
+    },
+    onValidate: (form) => {
+      const errors = {}
+      if (Number(form.value) <= 0) {
+        errors.value = i18next.t('market:formErrMsg')
+      }
+      if (Number(form.price) <= 0) {
+        errors.price = i18next.t('market:formErrMsg')
+      }
+      return errors;
     },
     calcApprove: (v) => {
       const value = new BigNumber(v);
@@ -82,13 +84,9 @@ function mapDispatchToProps(dispatch, props) {
   const idForm = 'orderLimit_0_' + props.address;
   const actions = bindActionCreators({
     orderLimit,
-    add,
-    reset
   }, dispatch)
   return {
     onSubmit: form => actions.orderLimit(props.address, [0, form.value, form.price], idForm),
-    formAdd: () => actions.add(idForm),
-    formReset: bool => actions.reset(idForm, bool)
   }
 }
 
