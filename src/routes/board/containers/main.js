@@ -52,34 +52,52 @@ class Container extends Component {
 function getLogs(history, address1, address2) {
   const log = [];
   let currentType = null;
-  let currentPrice = null;
   const pricesLast = {
     [address1]: 0,
     [address2]: 0,
   }
-  const markets = {
-    [address1]: ['A', 'B'],
-    [address2]: ['B', 'А'],
+  const circles = {
+    [address1]: address2,
+    [address2]: address1,
+  }
+  const names = {
+    [address1]: 'A',
+    [address2]: 'B',
   }
   _.forEach(history, (item) => {
-    let row = timeConverter(item.time) + ' ' + i18next.t('history:priceFutures') + ' ' + markets[item.type][0];
-    let dir = i18next.t('history:up');
+    // если цена не изменилась, то продолжает ехать
+    // если цена снизилась
+    // цена стала меньше, то переезжаем
+    // цена по прежнему выше, то продолжает ехать
+    // если выросла цена
+    // круг другой, то переезжаем
+    // круг тотже, то продолжает ехать
+    let row = timeConverter(item.time) + ' ' + i18next.t('history:priceFutures') + ' ' + names[item.type];
+    let isDirChange = false;
+    let dir = i18next.t('history:notChanged');
     if (item.price < pricesLast[item.type]) {
       dir = i18next.t('history:down');
+      if (item.price < pricesLast[circles[item.type]]) {
+        isDirChange = true;
+        currentType = circles[item.type];
+      }
+    } else if (item.price > pricesLast[item.type]) {
+      dir = i18next.t('history:up');
+      if (item.type !== currentType) {
+        isDirChange = true;
+        currentType = item.type;
+      }
     }
-    if (item.type !== currentType && item.price > currentPrice) {
-      dir = i18next.t('history:upPrice') + ' ' + markets[item.type][1];
-    }
-    pricesLast[item.type] = item.price;
     row += ' ' + dir + '!'
-    if (item.type !== currentType && item.price > currentPrice) {
-      currentType = item.type;
-      row += ' ' + i18next.t('history:market') + ' ' + markets[address1][0] + ': ' + pricesLast[address1] + ' AIR vs ' + i18next.t('history:market') + ' ' + markets[address2][0] + ': ' + pricesLast[address2] + ' AIR. ' + i18next.t('history:changeDir') + ' ' + markets[currentType][0] + '.';
+    pricesLast[item.type] = item.price;
+    if (isDirChange) {
+      row += ' ' + i18next.t('history:market') + ' ' + names[address1] +
+        ': ' + pricesLast[address1] + ' AIR vs ' + i18next.t('history:market') +
+        ' ' + names[address2] + ': ' + pricesLast[address2] + ' AIR. ' +
+        i18next.t('history:changeDir') + ' ' + names[currentType] + '.';
     } else {
-      row += ' ' + i18next.t('history:lastOrder') + ': ' + item.price + ' AIR. ' + i18next.t('history:sameDir') + ' ' + markets[currentType][0] + '.';
-    }
-    if (item.type === currentType) {
-      currentPrice = item.price;
+      row += ' ' + i18next.t('history:lastOrder') + ': ' + item.price + ' AIR. '
+        + i18next.t('history:sameDir') + ' ' + names[currentType] + '.';
     }
     log.push(row);
   });
