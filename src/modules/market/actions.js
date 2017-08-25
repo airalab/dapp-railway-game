@@ -288,6 +288,10 @@ export function orderLimit(address, data, formId) {
       .then(() => {
         dispatch(actionsForm.stop(formId));
         dispatch(actionsForm.success(formId, i18next.t('market:newLotSuccess')));
+        dispatch(actionsForm.reset(formId));
+        setTimeout(() => {
+          dispatch(actionsForm.success(formId, ''));
+        }, 4000)
       })
       .catch((e) => {
         console.log(e);
@@ -303,6 +307,10 @@ export function orderMarket(address, data, formId) {
       .then(() => {
         dispatch(actionsForm.stop(formId));
         dispatch(actionsForm.success(formId, i18next.t('market:opSuccess')));
+        dispatch(actionsForm.reset(formId));
+        setTimeout(() => {
+          dispatch(actionsForm.success(formId, ''));
+        }, 4000)
       })
       .catch((e) => {
         console.log(e);

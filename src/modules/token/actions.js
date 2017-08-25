@@ -153,6 +153,10 @@ export function approve(address, data, formId) {
       .then(() => {
         dispatch(actionsForm.stop(formId));
         dispatch(actionsForm.success(formId, i18next.t('newLimitSuccess')));
+        dispatch(actionsForm.reset(formId));
+        setTimeout(() => {
+          dispatch(actionsForm.success(formId, ''));
+        }, 4000)
       })
       .catch((e) => {
         console.log(e);
