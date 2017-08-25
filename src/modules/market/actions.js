@@ -236,22 +236,22 @@ export function loadModule(address) {
         dispatch(loadBalance(info.quote, hett.web3h.coinbase()))
         dispatch(loadAsks(address))
         dispatch(loadBids(address))
-        hett.watcher.addAddress(info.base, 'loadTokenBase', () => {
-          dispatch(loadApprove(info.base, address))
-          dispatch(loadBalance(info.base, hett.web3h.coinbase()))
-        })
-        hett.watcher.addAddress(info.quote, 'loadTokenQuote', () => {
-          dispatch(loadApprove(info.quote, address))
-          dispatch(loadBalance(info.quote, hett.web3h.coinbase()))
-        })
-        hett.watcher.addAddress(address, 'loadMarket', () => {
-          dispatch(loadAsks(address))
-          dispatch(loadBids(address))
-          dispatch(loadApprove(info.base, address))
-          dispatch(loadApprove(info.quote, address))
-          dispatch(loadBalance(info.base, hett.web3h.coinbase()))
-          dispatch(loadBalance(info.quote, hett.web3h.coinbase()))
-        })
+        hett.watcher.addAddress(info.base, 'loadTokenBase' + address, (base, params) => {
+          dispatch(loadApprove(base, params.market))
+          dispatch(loadBalance(base, hett.web3h.coinbase()))
+        }, { market: address })
+        hett.watcher.addAddress(info.quote, 'loadTokenQuote' + address, (quote, params) => {
+          dispatch(loadApprove(quote, params.market))
+          dispatch(loadBalance(quote, hett.web3h.coinbase()))
+        }, { market: address })
+        hett.watcher.addAddress(address, 'loadMarket' + address, (market, params) => {
+          dispatch(loadAsks(market))
+          dispatch(loadBids(market))
+          dispatch(loadApprove(params.base, market))
+          dispatch(loadApprove(params.quote, market))
+          dispatch(loadBalance(params.base, hett.web3h.coinbase()))
+          dispatch(loadBalance(params.quote, hett.web3h.coinbase()))
+        }, { base: info.base, quote: info.quote })
       })
   }
 }
