@@ -10,6 +10,7 @@ import { Youtube } from '../components/video'
 import { Main as Log } from '../components/log'
 import { loadModule, loadLastPrice } from '../../../modules/market/actions';
 import { load } from '../../../modules/history/actions';
+import { getVideo } from '../../../modules/app/actions';
 import { timeConverter } from '../../../utils/helper'
 
 class Container extends Component {
@@ -19,6 +20,7 @@ class Container extends Component {
     this.props.loadLastPrice(this.props.address1);
     this.props.loadLastPrice(this.props.address2);
     this.props.load(this.props.address1, this.props.address2);
+    this.props.getVideo();
   }
   render() {
     return (<div>
@@ -40,8 +42,12 @@ class Container extends Component {
           base2={this.props.base2}
           quote2={this.props.quote2}
         />
-        <h2>{i18next.t('title2')}</h2>
-        <Youtube />
+        {this.props.video !== '' &&
+          <div>
+            <h2>{i18next.t('title2')}</h2>
+            <Youtube id={this.props.video} />
+          </div>
+        }
         <h2>{i18next.t('title3')}</h2>
         <Log rows={this.props.log} />
       </div>
@@ -185,19 +191,22 @@ function mapStateToProps(state) {
     price2,
     style1,
     style2,
-    log
+    log,
+    video: state.app.video
   }
 }
 function mapDispatchToProps(dispatch) {
   const actions = bindActionCreators({
     loadModule,
     loadLastPrice,
-    load
+    load,
+    getVideo
   }, dispatch)
   return {
     loadModule: actions.loadModule,
     loadLastPrice: actions.loadLastPrice,
-    load: actions.load
+    load: actions.load,
+    getVideo: actions.getVideo
   }
 }
 
