@@ -38,7 +38,7 @@ export function getVideo() {
   return (dispatch) => {
     dispatch({
       type: SET_VIDEO,
-      payload: 'MDwj2Sd__pw'
+      payload: 'T5T3ccNuU1U'
     })
     // axios.get('http://aira.life/liveid')
     //   .then((result) => {
