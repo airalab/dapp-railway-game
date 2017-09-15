@@ -161,7 +161,11 @@ export function loadLastPrice(address) {
         ))
         log = _.orderBy(log, ['time', 'logIndex'], ['asc', 'desc']);
         const item = log.pop()
-        dispatch(setlastPrice(address, item.price))
+        if (_.has(item, 'price')) {
+          dispatch(setlastPrice(address, item.price))
+        } else {
+          dispatch(setlastPrice(address, 0))
+        }
       })
   }
 }
