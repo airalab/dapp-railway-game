@@ -14,6 +14,28 @@ export const formatDecimals = (price, decimals) => {
   return priceNum.shift(-decimals).toNumber();
 }
 
+export const getNetwork = () => {
+  const funcAsync = Promise.promisify(hett.web3.version.getNetwork);
+  return funcAsync()
+    .then(result => Number(result))
+}
+
+export const getNetworkName = () => (
+  getNetwork()
+    .then((result) => {
+      const networks = {
+        1: 'main',
+        3: 'ropsten',
+        4: 'rinkeby',
+        42: 'kovan'
+      }
+      if (_.has(networks, result)) {
+        return networks[result]
+      }
+      return '???'
+    })
+)
+
 export const timeConverter = (timestamp) => {
   const a = new Date(timestamp * 1000);
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
