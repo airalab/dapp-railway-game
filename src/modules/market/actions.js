@@ -7,7 +7,7 @@ import { LOAD, MODULE, SET_ASKS_ORDERS, SET_BIDS_ORDERS, SET_LAST_PRICE } from '
 import { flashMessage } from '../app/actions'
 import { loadModule as loadModuleToken, loadApprove, loadBalance } from '../token/actions'
 import { MARKET_DEFAULT_ADDR1, ORDER_CLOSED, ORDER_PARTIAL } from '../../config/config'
-import { getLog, getPrice, getBlock } from '../../utils/helper'
+import { getLog, getPrice, getBlock, promiseFor } from '../../utils/helper'
 
 export function module(info) {
   return {
@@ -274,7 +274,7 @@ export function contractSend(abi, address, action, values) {
       })
       .catch((e) => {
         console.log(e);
-        return Promise.reject();
+        return Promise.reject(e);
       })
   )
 }
@@ -285,40 +285,157 @@ export function send(address, action, data) {
   )
 }
 
+// export function orderLimit(address, data, formId) {
+//   return (dispatch) => {
+//     dispatch(actionsForm.start(formId));
+//     dispatch(send(address, 'orderLimit', data))
+//       .then(() => {
+//         dispatch(actionsForm.stop(formId));
+//         dispatch(actionsForm.success(formId, i18next.t('market:newLotSuccess')));
+//         dispatch(actionsForm.reset(formId));
+//         setTimeout(() => {
+//           dispatch(actionsForm.success(formId, ''));
+//         }, 4000)
+//       })
+//       .catch((e) => {
+//         console.log(e);
+//         return Promise.reject(e);
+//       })
+//   }
+// }
+//
+// export function orderMarket(address, data, formId) {
+//   return (dispatch) => {
+//     dispatch(actionsForm.start(formId));
+//     dispatch(send(address, 'orderMarket', data))
+//       .then(() => {
+//         dispatch(actionsForm.stop(formId));
+//         dispatch(actionsForm.success(formId, i18next.t('market:opSuccess')));
+//         dispatch(actionsForm.reset(formId));
+//         setTimeout(() => {
+//           dispatch(actionsForm.success(formId, ''));
+//         }, 4000)
+//       })
+//       .catch((e) => {
+//         console.log(e);
+//         return Promise.reject(e);
+//       })
+//   }
+// }
+
 export function orderLimit(address, data, formId) {
   return (dispatch) => {
-    dispatch(actionsForm.start(formId));
     dispatch(send(address, 'orderLimit', data))
       .then(() => {
-        dispatch(actionsForm.stop(formId));
         dispatch(actionsForm.success(formId, i18next.t('market:newLotSuccess')));
-        dispatch(actionsForm.reset(formId));
         setTimeout(() => {
           dispatch(actionsForm.success(formId, ''));
         }, 4000)
       })
       .catch((e) => {
         console.log(e);
-        return Promise.reject();
+        return Promise.reject(e);
       })
   }
 }
 
 export function orderMarket(address, data, formId) {
   return (dispatch) => {
-    dispatch(actionsForm.start(formId));
     dispatch(send(address, 'orderMarket', data))
       .then(() => {
-        dispatch(actionsForm.stop(formId));
         dispatch(actionsForm.success(formId, i18next.t('market:opSuccess')));
-        dispatch(actionsForm.reset(formId));
         setTimeout(() => {
           dispatch(actionsForm.success(formId, ''));
         }, 4000)
       })
       .catch((e) => {
         console.log(e);
-        return Promise.reject();
+        return Promise.reject(e);
+      })
+  }
+}
+
+function calc(address, type, price, value) {
+  let valueAdd = value;
+  let valueClose = value;
+  const orders = [];
+  let market;
+  const func = (type === 1) ? 'bids' : 'asks'
+  return hett.getContractByName('Market', address)
+    .then((contract) => {
+      market = contract;
+      return market.call(func + 'Length')
+    })
+    .then(length => (
+      promiseFor(i => (i < Number(length) && valueAdd > 0), i => (
+        getOrder(market, func, i)
+          .then((order) => {
+            if ((type === 1 && order.price <= price) || (type === 0 && order.price >= price)) {
+              let valuePart = 0
+              if (valueAdd < order.value) {
+                valuePart = valueAdd
+              } else {
+                valuePart = order.value
+              }
+              orders.push({
+                price: order.price,
+                value: valuePart
+              })
+              valueAdd -= valuePart
+            }
+            return (i + 1);
+          })
+          .catch(() => false)
+      ), 0)
+    ))
+    .then(() => {
+      if (valueAdd > 0) {
+        valueClose -= valueAdd
+      }
+      let sum = 0
+      if (orders.length > 0) {
+        _.forEach(orders, (order) => {
+          sum += (order.price * order.value)
+        })
+      }
+      return {
+        valueAdd,
+        valueClose,
+        sum
+      }
+    })
+}
+
+export function sendOrder(address, data, formId) {
+  return (dispatch) => {
+    dispatch(actionsForm.start(formId));
+    calc(address, data[0], Number(data[2]), Number(data[1]))
+      .then((result) => {
+        console.log(result);
+        if (result.valueClose > 0 && result.valueAdd === 0) {
+          // dispatch(orderMarket(address, data, formId))
+          console.log('будет куплено:', result.valueClose, 'на сумму', result.sum);
+        } else if (result.valueAdd > 0 && result.valueClose === 0) {
+          // dispatch(orderLimit(address, data, formId))
+          dispatch(send(address, 'orderLimit', data))
+            .then(() => {
+              dispatch(actionsForm.success(formId, i18next.t('market:newLotSuccess')));
+              setTimeout(() => {
+                dispatch(actionsForm.success(formId, ''));
+              }, 4000)
+            })
+          console.log('будет добавленно:', result.valueAdd, 'по цене', data[2], 'на сумму', (result.valueAdd * data[2]));
+        } else if (data[0] === 1 && result.valueAdd > 0 && result.valueClose > 0) {
+          console.log('будет куплено:', result.valueClose, 'на сумму', result.sum);
+          console.log('будет добавленно:', result.valueAdd, 'по цене', data[2], 'на сумму', (result.valueAdd * data[2]));
+        } else if (data[0] === 0 && result.valueAdd > 0 && result.valueClose > 0) {
+          console.log('будет проданно:', result.valueClose, 'на сумму', result.sum);
+          console.log('будет добавленно:', result.valueAdd, 'по цене', data[2], 'на сумму', (result.valueAdd * data[2]));
+        }
+      })
+      .catch((e) => {
+        dispatch(actionsForm.stop(formId));
+        return Promise.reject(e);
       })
   }
 }
