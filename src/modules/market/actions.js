@@ -8,6 +8,7 @@ import { flashMessage } from '../app/actions'
 import { loadModule as loadModuleToken, loadApprove, loadBalance } from '../token/actions'
 import { MARKET_DEFAULT_ADDR1, ORDER_CLOSED, ORDER_PARTIAL } from '../../config/config'
 import { getLog, getPrice, getBlock, promiseFor } from '../../utils/helper'
+import confirm from '../../routes/market/containers/confirm'
 
 export function module(info) {
   return {
@@ -285,46 +286,8 @@ export function send(address, action, data) {
   )
 }
 
-// export function orderLimit(address, data, formId) {
-//   return (dispatch) => {
-//     dispatch(actionsForm.start(formId));
-//     dispatch(send(address, 'orderLimit', data))
-//       .then(() => {
-//         dispatch(actionsForm.stop(formId));
-//         dispatch(actionsForm.success(formId, i18next.t('market:newLotSuccess')));
-//         dispatch(actionsForm.reset(formId));
-//         setTimeout(() => {
-//           dispatch(actionsForm.success(formId, ''));
-//         }, 4000)
-//       })
-//       .catch((e) => {
-//         console.log(e);
-//         return Promise.reject(e);
-//       })
-//   }
-// }
-//
-// export function orderMarket(address, data, formId) {
-//   return (dispatch) => {
-//     dispatch(actionsForm.start(formId));
-//     dispatch(send(address, 'orderMarket', data))
-//       .then(() => {
-//         dispatch(actionsForm.stop(formId));
-//         dispatch(actionsForm.success(formId, i18next.t('market:opSuccess')));
-//         dispatch(actionsForm.reset(formId));
-//         setTimeout(() => {
-//           dispatch(actionsForm.success(formId, ''));
-//         }, 4000)
-//       })
-//       .catch((e) => {
-//         console.log(e);
-//         return Promise.reject(e);
-//       })
-//   }
-// }
-
 export function orderLimit(address, data, formId) {
-  return (dispatch) => {
+  return dispatch => (
     dispatch(send(address, 'orderLimit', data))
       .then(() => {
         dispatch(actionsForm.success(formId, i18next.t('market:newLotSuccess')));
@@ -336,11 +299,11 @@ export function orderLimit(address, data, formId) {
         console.log(e);
         return Promise.reject(e);
       })
-  }
+  )
 }
 
 export function orderMarket(address, data, formId) {
-  return (dispatch) => {
+  return dispatch => (
     dispatch(send(address, 'orderMarket', data))
       .then(() => {
         dispatch(actionsForm.success(formId, i18next.t('market:opSuccess')));
@@ -352,10 +315,10 @@ export function orderMarket(address, data, formId) {
         console.log(e);
         return Promise.reject(e);
       })
-  }
+  )
 }
 
-function calc(address, type, price, value) {
+export function calc(address, type, price, value) {
   let valueAdd = value;
   let valueClose = value;
   const orders = [];
@@ -370,6 +333,7 @@ function calc(address, type, price, value) {
       promiseFor(i => (i < Number(length) && valueAdd > 0), i => (
         getOrder(market, func, i)
           .then((order) => {
+            console.log(i, order.price, price);
             if ((type === 1 && order.price <= price) || (type === 0 && order.price >= price)) {
               let valuePart = 0
               if (valueAdd < order.value) {
@@ -383,6 +347,10 @@ function calc(address, type, price, value) {
               })
               valueAdd -= valuePart
             }
+            // if ((type === 1 && order.price > price) || (type === 0 && order.price < price)) {
+            //   // stop
+            //   return Number(length)
+            // }
             return (i + 1);
           })
           .catch(() => false)
@@ -406,32 +374,67 @@ function calc(address, type, price, value) {
     })
 }
 
+export function confirmOrder(address, data, formId) {
+  return dispatch => (
+    confirm({ data, btnActive: 0 })
+      .then(({ button }) => {
+        if (button === 1) {
+          dispatch(orderMarket(address, [data.type, data.valueClose], formId))
+        } else {
+          dispatch(orderLimit(address, [data.type, data.price, data.valueAdd], formId))
+        }
+        return confirm({ data, btnActive: button })
+      })
+      .then(({ button }) => {
+        if (button === 1) {
+          dispatch(orderMarket(address, [data.type, data.valueClose], formId))
+        } else {
+          dispatch(orderLimit(address, [data.type, data.price, data.valueAdd], formId))
+        }
+      })
+      .catch(() => Promise.reject(Error('cancel!')))
+  )
+}
+
 export function sendOrder(address, data, formId) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const token = state.market.modules[address].info.base
+    const symbol = state.token.modules[token].info.symbol
     dispatch(actionsForm.start(formId));
     calc(address, data[0], Number(data[2]), Number(data[1]))
       .then((result) => {
-        console.log(result);
         if (result.valueClose > 0 && result.valueAdd === 0) {
-          // dispatch(orderMarket(address, data, formId))
-          console.log('будет куплено:', result.valueClose, 'на сумму', result.sum);
+          return dispatch(orderMarket(address, [data[0], data[1]], formId))
         } else if (result.valueAdd > 0 && result.valueClose === 0) {
-          // dispatch(orderLimit(address, data, formId))
-          dispatch(send(address, 'orderLimit', data))
-            .then(() => {
-              dispatch(actionsForm.success(formId, i18next.t('market:newLotSuccess')));
-              setTimeout(() => {
-                dispatch(actionsForm.success(formId, ''));
-              }, 4000)
-            })
-          console.log('будет добавленно:', result.valueAdd, 'по цене', data[2], 'на сумму', (result.valueAdd * data[2]));
+          return dispatch(orderLimit(address, data, formId))
         } else if (data[0] === 1 && result.valueAdd > 0 && result.valueClose > 0) {
-          console.log('будет куплено:', result.valueClose, 'на сумму', result.sum);
-          console.log('будет добавленно:', result.valueAdd, 'по цене', data[2], 'на сумму', (result.valueAdd * data[2]));
+          return dispatch(confirmOrder(
+            address,
+            { type: 1,
+              valueClose: result.valueClose,
+              valueAdd: result.valueAdd,
+              price: Number(data[1]),
+              symbol
+            },
+            formId
+          ))
         } else if (data[0] === 0 && result.valueAdd > 0 && result.valueClose > 0) {
-          console.log('будет проданно:', result.valueClose, 'на сумму', result.sum);
-          console.log('будет добавленно:', result.valueAdd, 'по цене', data[2], 'на сумму', (result.valueAdd * data[2]));
+          return dispatch(confirmOrder(
+            address,
+            { type: 0,
+              valueClose: result.valueClose,
+              valueAdd: result.valueAdd,
+              price: Number(data[1]),
+              symbol
+            },
+            formId
+          ))
         }
+        return false;
+      })
+      .then(() => {
+        dispatch(actionsForm.stop(formId));
       })
       .catch((e) => {
         dispatch(actionsForm.stop(formId));
