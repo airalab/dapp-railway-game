@@ -160,7 +160,7 @@ export function loadLastPrice(address) {
             time: blocks[i]
           }
         ))
-        log = _.orderBy(log, ['time', 'logIndex'], ['asc', 'desc']);
+        log = _.orderBy(log, ['time', 'logIndex'], ['asc', 'asc']);
         const item = log.pop()
         if (_.has(item, 'price')) {
           dispatch(setlastPrice(address, item.price))

@@ -57,7 +57,7 @@ export function load(address1, address2) {
             time: blocks[i]
           }
         ))
-        log = _.orderBy(log, ['time', 'logIndex'], ['asc', 'desc']);
+        log = _.orderBy(log, ['time', 'logIndex'], ['asc', 'asc']);
         dispatch(setHistory(log));
       })
   }

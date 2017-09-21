@@ -83,13 +83,13 @@ function getLogs(history, address1, address2) {
     let dir = i18next.t('history:notChanged');
     if (item.price < pricesLast[item.type]) {
       dir = i18next.t('history:down');
-      if (item.price < pricesLast[circles[item.type]]) {
+      if (item.type === currentType && item.price < pricesLast[circles[item.type]]) {
         isDirChange = true;
         currentType = circles[item.type];
       }
     } else if (item.price > pricesLast[item.type]) {
       dir = i18next.t('history:up');
-      if (item.type !== currentType) {
+      if (item.type !== currentType && item.price > pricesLast[circles[item.type]]) {
         isDirChange = true;
         currentType = item.type;
       }
