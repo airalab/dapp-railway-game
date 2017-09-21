@@ -295,10 +295,7 @@ export function orderLimit(address, data, formId) {
           dispatch(actionsForm.success(formId, ''));
         }, 4000)
       })
-      .catch((e) => {
-        console.log(e);
-        return Promise.reject(e);
-      })
+      .catch(e => Promise.reject(e))
   )
 }
 
@@ -311,10 +308,7 @@ export function orderMarket(address, data, formId) {
           dispatch(actionsForm.success(formId, ''));
         }, 4000)
       })
-      .catch((e) => {
-        console.log(e);
-        return Promise.reject(e);
-      })
+      .catch(e => Promise.reject(e))
   )
 }
 
@@ -323,7 +317,7 @@ export function calc(address, type, price, value) {
   let valueClose = value;
   const orders = [];
   let market;
-  const func = (type === 1) ? 'bids' : 'asks'
+  const func = (type === 'buy') ? 'bids' : 'asks'
   return hett.getContractByName('Market', address)
     .then((contract) => {
       market = contract;
@@ -333,8 +327,7 @@ export function calc(address, type, price, value) {
       promiseFor(i => (i < Number(length) && valueAdd > 0), i => (
         getOrder(market, func, i)
           .then((order) => {
-            console.log(i, order.price, price);
-            if ((type === 1 && order.price <= price) || (type === 0 && order.price >= price)) {
+            if ((type === 'buy' && order.price <= price) || (type === 'sell' && order.price >= price)) {
               let valuePart = 0
               if (valueAdd < order.value) {
                 valuePart = valueAdd
@@ -347,10 +340,6 @@ export function calc(address, type, price, value) {
               })
               valueAdd -= valuePart
             }
-            // if ((type === 1 && order.price > price) || (type === 0 && order.price < price)) {
-            //   // stop
-            //   return Number(length)
-            // }
             return (i + 1);
           })
           .catch(() => false)
@@ -381,7 +370,7 @@ export function confirmOrder(address, data, formId) {
         if (button === 1) {
           dispatch(orderMarket(address, [data.type, data.valueClose], formId))
         } else {
-          dispatch(orderLimit(address, [data.type, data.price, data.valueAdd], formId))
+          dispatch(orderLimit(address, [data.type, data.valueAdd, data.price], formId))
         }
         return confirm({ data, btnActive: button })
       })
@@ -389,7 +378,7 @@ export function confirmOrder(address, data, formId) {
         if (button === 1) {
           dispatch(orderMarket(address, [data.type, data.valueClose], formId))
         } else {
-          dispatch(orderLimit(address, [data.type, data.price, data.valueAdd], formId))
+          dispatch(orderLimit(address, [data.type, data.valueAdd, data.price], formId))
         }
       })
       .catch(() => Promise.reject(Error('cancel!')))
@@ -401,31 +390,36 @@ export function sendOrder(address, data, formId) {
     const state = getState()
     const token = state.market.modules[address].info.base
     const symbol = state.token.modules[token].info.symbol
+    const type = (data.type === 'buy') ? 1 : 0
+    const value = Number(data.value)
+    const price = Number(data.price)
     dispatch(actionsForm.start(formId));
-    calc(address, data[0], Number(data[2]), Number(data[1]))
+    calc(address, data.type, price, value)
       .then((result) => {
         if (result.valueClose > 0 && result.valueAdd === 0) {
-          return dispatch(orderMarket(address, [data[0], data[1]], formId))
+          return dispatch(orderMarket(address, [type, value], formId))
         } else if (result.valueAdd > 0 && result.valueClose === 0) {
-          return dispatch(orderLimit(address, data, formId))
-        } else if (data[0] === 1 && result.valueAdd > 0 && result.valueClose > 0) {
+          return dispatch(orderLimit(address, [type, value, price], formId))
+        } else if (data.type === 'buy' && result.valueAdd > 0 && result.valueClose > 0) {
           return dispatch(confirmOrder(
             address,
-            { type: 1,
+            {
+              type,
               valueClose: result.valueClose,
               valueAdd: result.valueAdd,
-              price: Number(data[1]),
+              price,
               symbol
             },
             formId
           ))
-        } else if (data[0] === 0 && result.valueAdd > 0 && result.valueClose > 0) {
+        } else if (data.type === 'sell' && result.valueAdd > 0 && result.valueClose > 0) {
           return dispatch(confirmOrder(
             address,
-            { type: 0,
+            {
+              type,
               valueClose: result.valueClose,
               valueAdd: result.valueAdd,
-              price: Number(data[1]),
+              price,
               symbol
             },
             formId

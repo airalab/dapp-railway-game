@@ -87,7 +87,7 @@ function mapDispatchToProps(dispatch, props) {
     sendOrder,
   }, dispatch)
   return {
-    onSubmit: form => actions.sendOrder(props.address, [1, form.value, form.price], idForm),
+    onSubmit: form => actions.sendOrder(props.address, { ...form, type: 'buy' }, idForm),
   }
 }
 
