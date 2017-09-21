@@ -4,6 +4,8 @@
   "titleOrdersSell": "Orders for sale",
   "titleOrdersBuy": "Orders for purchase",
   "price": "price",
+  "maxPrice": "max price",
+  "minPrice": "min price",
   "value": "amount",
   "time": "time",
   "balanceTokens": "Token balance",
@@ -28,5 +30,9 @@
   "closeOrderPrice": "The order was closed in the market {{market}} at the price of {{price}}",
   "partialOrderPrice": "The order was closed partially in the market {{market}} at the price of {{price}}",
   "newLotSuccess": "The order had added to the market",
-  "opSuccess": "Operation was successfully completed"
+  "opSuccess": "Operation was successfully completed",
+  "confTitle": "The market is not enough volume at the specified price",
+  "confAvailableBuy": "Available for purchase at the specified price {{value}} {{symbol}}",
+  "confAvailableSell": "Available for sale at specified price {{value}} {{symbol}}",
+  "confAdded": "The rest {{value}} {{symbol}} add to the market"
 }
