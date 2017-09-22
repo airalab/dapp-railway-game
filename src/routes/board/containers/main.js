@@ -8,7 +8,7 @@ import { MARKET_DEFAULT_ADDR1, MARKET_DEFAULT_ADDR2 } from '../../../config/conf
 import { Main } from '../components/main'
 import { Youtube } from '../components/video'
 import { Main as Log } from '../components/log'
-import { loadModule, loadLastPrice } from '../../../modules/market/actions';
+import { loadModule, events, loadLastPrice, switchDir } from '../../../modules/market/actions';
 import { load } from '../../../modules/history/actions';
 import { getVideo } from '../../../modules/app/actions';
 import { timeConverter } from '../../../utils/helper'
@@ -17,6 +17,8 @@ class Container extends Component {
   componentWillMount() {
     this.props.loadModule(this.props.address1);
     this.props.loadModule(this.props.address2);
+    this.props.events(this.props.address1);
+    this.props.events(this.props.address2);
     this.props.loadLastPrice(this.props.address1);
     this.props.loadLastPrice(this.props.address2);
     this.props.load(this.props.address1, this.props.address2);
@@ -42,6 +44,13 @@ class Container extends Component {
           base2={this.props.base2}
           quote2={this.props.quote2}
         />
+        <div className="text-center" style={{ marginBottom: 30 }}>
+          {this.props.price1 > 0 && this.props.price2 > 0 ?
+            <button className="btn btn-default" onClick={this.props.onSwitchDir}>{i18next.t('market:marketSwitch')}</button>
+            :
+            <button className="btn btn-default" onClick={this.props.onSwitchDir} disabled>{i18next.t('market:marketSwitch')}</button>
+          }
+        </div>
         {this.props.video !== '' &&
           <div>
             <h2>{i18next.t('title2')}</h2>
@@ -198,15 +207,19 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   const actions = bindActionCreators({
     loadModule,
+    events,
     loadLastPrice,
     load,
-    getVideo
+    getVideo,
+    switchDir
   }, dispatch)
   return {
     loadModule: actions.loadModule,
+    events: actions.events,
     loadLastPrice: actions.loadLastPrice,
     load: actions.load,
-    getVideo: actions.getVideo
+    getVideo: actions.getVideo,
+    onSwitchDir: actions.switchDir
   }
 }
 

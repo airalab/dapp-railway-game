@@ -28,5 +28,15 @@
   "closeOrderPrice": "The order was closed in the market {{market}} at the price of {{price}}",
   "partialOrderPrice": "The order was closed partially in the market {{market}} at the price of {{price}}",
   "newLotSuccess": "The order had added to the market",
-  "opSuccess": "Operation was successfully completed"
+  "opSuccess": "Operation was successfully completed",
+  "confTitle": "The market is not enough volume at the specified price",
+  "confAvailableBuy": "Available for purchase at the specified price {{value}} {{symbol}}",
+  "confAvailableSell": "Available for sale at specified price {{value}} {{symbol}}",
+  "confAdded": "The rest {{value}} {{symbol}} add to the market",
+  "marketSwitch": "Market switch",
+  "messageSwitch": "In order to switch the market, you need to buy {{value}} for the amount {{sum}}",
+  "nonApprove": "Not enough AIR is allowed for trading on the {{market}} market",
+  "approveSum": "{{sum}} is required, and {{approve}} is available",
+  "approveText": "To increase the allowed volume for trading, go to the market",
+  "notFoundLot": "For easy switching there are no matching lots. Try to go to the market."
 }
