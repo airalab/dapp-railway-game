@@ -7,8 +7,7 @@ import { LOAD, MODULE, SET_ASKS_ORDERS, SET_BIDS_ORDERS, SET_LAST_PRICE } from '
 import { flashMessage } from '../app/actions'
 import { loadModule as loadModuleToken, loadApprove, loadBalance } from '../token/actions'
 import { MARKET_DEFAULT_ADDR1, ORDER_CLOSED, ORDER_PARTIAL } from '../../config/config'
-import { getLog, getPrice, getBlock, promiseFor } from '../../utils/helper'
-import confirm from '../../routes/market/containers/confirm'
+import { getLog, getPrice, getBlock } from '../../utils/helper'
 
 export function module(info) {
   return {
@@ -275,7 +274,7 @@ export function contractSend(abi, address, action, values) {
       })
       .catch((e) => {
         console.log(e);
-        return Promise.reject(e);
+        return Promise.reject();
       })
   )
 }
@@ -287,152 +286,39 @@ export function send(address, action, data) {
 }
 
 export function orderLimit(address, data, formId) {
-  return dispatch => (
+  return (dispatch) => {
+    dispatch(actionsForm.start(formId));
     dispatch(send(address, 'orderLimit', data))
       .then(() => {
+        dispatch(actionsForm.stop(formId));
         dispatch(actionsForm.success(formId, i18next.t('market:newLotSuccess')));
+        dispatch(actionsForm.reset(formId));
         setTimeout(() => {
           dispatch(actionsForm.success(formId, ''));
         }, 4000)
       })
-      .catch(e => Promise.reject(e))
-  )
+      .catch((e) => {
+        console.log(e);
+        return Promise.reject();
+      })
+  }
 }
 
 export function orderMarket(address, data, formId) {
-  return dispatch => (
+  return (dispatch) => {
+    dispatch(actionsForm.start(formId));
     dispatch(send(address, 'orderMarket', data))
       .then(() => {
+        dispatch(actionsForm.stop(formId));
         dispatch(actionsForm.success(formId, i18next.t('market:opSuccess')));
+        dispatch(actionsForm.reset(formId));
         setTimeout(() => {
           dispatch(actionsForm.success(formId, ''));
         }, 4000)
       })
-      .catch(e => Promise.reject(e))
-  )
-}
-
-export function calc(address, type, price, value) {
-  let valueAdd = value;
-  let valueClose = value;
-  const orders = [];
-  let market;
-  const func = (type === 'buy') ? 'bids' : 'asks'
-  return hett.getContractByName('Market', address)
-    .then((contract) => {
-      market = contract;
-      return market.call(func + 'Length')
-    })
-    .then(length => (
-      promiseFor(i => (i < Number(length) && valueAdd > 0), i => (
-        getOrder(market, func, i)
-          .then((order) => {
-            if ((type === 'buy' && order.price <= price) || (type === 'sell' && order.price >= price)) {
-              let valuePart = 0
-              if (valueAdd < order.value) {
-                valuePart = valueAdd
-              } else {
-                valuePart = order.value
-              }
-              orders.push({
-                price: order.price,
-                value: valuePart
-              })
-              valueAdd -= valuePart
-            }
-            return (i + 1);
-          })
-          .catch(() => false)
-      ), 0)
-    ))
-    .then(() => {
-      if (valueAdd > 0) {
-        valueClose -= valueAdd
-      }
-      let sum = 0
-      if (orders.length > 0) {
-        _.forEach(orders, (order) => {
-          sum += (order.price * order.value)
-        })
-      }
-      return {
-        valueAdd,
-        valueClose,
-        sum
-      }
-    })
-}
-
-export function confirmOrder(address, data, formId) {
-  return dispatch => (
-    confirm({ data, btnActive: 0 })
-      .then(({ button }) => {
-        if (button === 1) {
-          dispatch(orderMarket(address, [data.type, data.valueClose], formId))
-        } else {
-          dispatch(orderLimit(address, [data.type, data.valueAdd, data.price], formId))
-        }
-        return confirm({ data, btnActive: button })
-      })
-      .then(({ button }) => {
-        if (button === 1) {
-          dispatch(orderMarket(address, [data.type, data.valueClose], formId))
-        } else {
-          dispatch(orderLimit(address, [data.type, data.valueAdd, data.price], formId))
-        }
-      })
-      .catch(() => Promise.reject(Error('cancel!')))
-  )
-}
-
-export function sendOrder(address, data, formId) {
-  return (dispatch, getState) => {
-    const state = getState()
-    const token = state.market.modules[address].info.base
-    const symbol = state.token.modules[token].info.symbol
-    const type = (data.type === 'buy') ? 1 : 0
-    const value = Number(data.value)
-    const price = Number(data.price)
-    dispatch(actionsForm.start(formId));
-    calc(address, data.type, price, value)
-      .then((result) => {
-        if (result.valueClose > 0 && result.valueAdd === 0) {
-          return dispatch(orderMarket(address, [type, value], formId))
-        } else if (result.valueAdd > 0 && result.valueClose === 0) {
-          return dispatch(orderLimit(address, [type, value, price], formId))
-        } else if (data.type === 'buy' && result.valueAdd > 0 && result.valueClose > 0) {
-          return dispatch(confirmOrder(
-            address,
-            {
-              type,
-              valueClose: result.valueClose,
-              valueAdd: result.valueAdd,
-              price,
-              symbol
-            },
-            formId
-          ))
-        } else if (data.type === 'sell' && result.valueAdd > 0 && result.valueClose > 0) {
-          return dispatch(confirmOrder(
-            address,
-            {
-              type,
-              valueClose: result.valueClose,
-              valueAdd: result.valueAdd,
-              price,
-              symbol
-            },
-            formId
-          ))
-        }
-        return false;
-      })
-      .then(() => {
-        dispatch(actionsForm.stop(formId));
-      })
       .catch((e) => {
-        dispatch(actionsForm.stop(formId));
-        return Promise.reject(e);
+        console.log(e);
+        return Promise.reject();
       })
   }
 }

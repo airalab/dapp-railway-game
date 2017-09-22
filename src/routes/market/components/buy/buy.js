@@ -6,18 +6,28 @@ const Form = (props) => {
   let currentApprove = null
   if (props.fields.value.value !== '') {
     const approve = props.calcApprove(Number(props.fields.value.value));
-    if (approve <= 0) {
-      btn = <button type="submit" className="btn btn-default" disabled={props.form.submitting}>{i18next.t('market:submitSell')}</button>
+    if (approve[0] > 0) {
+      btn = <div className="alert alert-danger">
+        {i18next.t('market:notEnoughTokens', { token: props.base.info.name })}
+      </div>
+    } else if (approve[1] <= 0) {
+      btn = (
+        <div>
+          <span>{i18next.t('market:sum')} &asymp; {approve[2]}</span>
+          &nbsp;
+          <button type="submit" className="btn btn-default" disabled={props.form.submitting}>{i18next.t('market:submitBuy')}</button>
+        </div>
+      )
     } else {
       currentApprove = (
         <div className="text-warning" style={{ marginBottom: 10 }}>
-          <span className="fa fa-exclamation" /> {i18next.t('market:nonValueApprove')}: <b>{approve} {props.base.info.symbol}</b>, {i18next.t('market:valueApprove')}: <b>{props.approve} {props.base.info.symbol}</b>
+          <span className="fa fa-exclamation" /> {i18next.t('market:nonValueApprove')}: <b>{approve[1]} {props.quote.info.symbol}</b>, {i18next.t('market:valueApprove')}: <b>{props.approve} {props.quote.info.symbol}</b>
         </div>
       )
     }
   }
   return <div>
-    <p>{i18next.t('market:addSell')} <b>{props.base.info.name}</b></p>
+    <p>{i18next.t('market:buyOrder')} <b>{props.base.info.name}</b></p>
     <form onSubmit={props.handleSubmit}>
       <div className={(props.fields.value.error) ? 'form-group has-error' : 'form-group'}>
         <span className="control-label">{i18next.t('market:value')}:</span>
@@ -27,16 +37,6 @@ const Form = (props) => {
         </div>
         {props.fields.value.error &&
           <span className="help-block">{props.fields.value.error}</span>
-        }
-      </div>
-      <div className={(props.fields.price.error) ? 'form-group has-error' : 'form-group'}>
-        <span className="control-label">{i18next.t('market:price')}:</span>
-        <div className="input-group">
-          <input value={props.fields.price.value} onChange={props.handleChange} name="price" type="text" className="form-control" />
-          <div className="input-group-addon">{props.quote.info.symbol}</div>
-        </div>
-        {props.fields.price.error &&
-          <span className="help-block">{props.fields.price.error}</span>
         }
       </div>
       {currentApprove}

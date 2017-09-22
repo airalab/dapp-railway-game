@@ -5,20 +5,25 @@ import _ from 'lodash'
 import BigNumber from 'bignumber.js'
 import { Form } from 'vol4-form'
 import i18next from 'i18next'
-import Add from '../components/buy/add';
-import { orderLimit } from '../../../modules/market/actions';
+import Buy from '../components/buy/buy';
+import { orderMarket } from '../../../modules/market/actions';
 
 const Container = props => (
   <Form id={props.idForm} {...props} onSubmit={props.onSubmit}>
-    <Add />
+    <Buy />
   </Form>
 )
 
 function mapStateToProps(state, props) {
-  const idForm = 'orderLimit_1_' + props.address;
+  const idForm = 'orderMarket_1_' + props.address;
   const address = props.address
+  let market = {
+    address,
+    isLoadBids: true
+  }
+  let orders = [];
   let ap = 0;
-  let decimals = 0;
+  let token;
   let base = {
     info: {
       name: '',
@@ -32,9 +37,8 @@ function mapStateToProps(state, props) {
     }
   }
   if (_.has(state.market.modules, address)) {
-    const market = state.market.modules[address]
+    market = { ...market, ...state.market.modules[address] }
     if (_.has(market, 'info') && _.has(state.token.modules, market.info.base) && _.has(state.token.modules, market.info.quote)) {
-      decimals = market.info.decimals
       if (_.has(state.token.modules[market.info.base], 'info')) {
         base = state.token.modules[market.info.base]
       }
@@ -44,6 +48,10 @@ function mapStateToProps(state, props) {
           ap = quote.approve[address];
         }
       }
+      token = market.info.quote
+    }
+    if (_.has(market, 'bids')) {
+      orders = _.sortBy(market.bids, ['price'])
     }
   }
   return {
@@ -51,13 +59,10 @@ function mapStateToProps(state, props) {
     address,
     base,
     quote,
+    token,
     approve: ap,
     fields: {
       value: {
-        value: '',
-        type: 'text',
-      },
-      price: {
         value: '',
         type: 'text',
       }
@@ -67,27 +72,37 @@ function mapStateToProps(state, props) {
       if (Number(form.value) <= 0) {
         errors.value = i18next.t('market:formErrMsg')
       }
-      if (Number(form.price) <= 0) {
-        errors.price = i18next.t('market:formErrMsg')
-      }
       return errors;
     },
-    calcApprove: (v, p) => {
-      const price = new BigNumber(p);
-      const value = new BigNumber(v);
+    calcApprove: (v) => {
       const allowance = new BigNumber(ap);
-      const amount = price.times(value).div((new BigNumber(10)).pow(decimals));
-      return amount.minus(allowance).toNumber();
+      let quoteValue = new BigNumber(0);
+      let value = new BigNumber(v);
+      _.forEach(orders, (order) => {
+        if (value > 0) {
+          if (order.value >= value) {
+            const orderPrice = new BigNumber(order.price);
+            quoteValue = quoteValue.plus(orderPrice.times(value));
+            value = new BigNumber(0);
+          } else {
+            const orderPrice = new BigNumber(order.price);
+            const orderValue = new BigNumber(order.value);
+            quoteValue = quoteValue.plus(orderPrice.times(orderValue));
+            value = value.minus(orderValue);
+          }
+        }
+      })
+      return [value.toNumber(), quoteValue.minus(allowance).toNumber(), quoteValue.toNumber()]
     }
   }
 }
 function mapDispatchToProps(dispatch, props) {
-  const idForm = 'orderLimit_1_' + props.address;
+  const idForm = 'orderMarket_1_' + props.address;
   const actions = bindActionCreators({
-    orderLimit,
+    orderMarket,
   }, dispatch)
   return {
-    onSubmit: form => actions.orderLimit(props.address, [1, form.value, form.price], idForm),
+    onSubmit: form => actions.orderMarket(props.address, [1, form.value], idForm),
   }
 }
 

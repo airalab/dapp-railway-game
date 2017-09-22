@@ -6,7 +6,7 @@ import BigNumber from 'bignumber.js'
 import { Form } from 'vol4-form'
 import i18next from 'i18next'
 import Add from '../components/sell/add';
-import { sendOrder } from '../../../modules/market/actions';
+import { orderLimit } from '../../../modules/market/actions';
 
 const Container = props => (
   <Form id={props.idForm} {...props} onSubmit={props.onSubmit}>
@@ -83,10 +83,10 @@ function mapStateToProps(state, props) {
 function mapDispatchToProps(dispatch, props) {
   const idForm = 'orderLimit_0_' + props.address;
   const actions = bindActionCreators({
-    sendOrder,
+    orderLimit,
   }, dispatch)
   return {
-    onSubmit: form => actions.sendOrder(props.address, { ...form, type: 'sell' }, idForm),
+    onSubmit: form => actions.orderLimit(props.address, [0, form.value, form.price], idForm),
   }
 }
 

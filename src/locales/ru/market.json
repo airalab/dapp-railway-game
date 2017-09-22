@@ -4,8 +4,6 @@
   "titleOrdersSell": "Ордера на продажу",
   "titleOrdersBuy": "Ордера на покупку",
   "price": "цена",
-  "maxPrice": "макс. цена",
-  "minPrice": "мин. цена",
   "value": "кол-во",
   "time": "время",
   "balanceTokens": "Баланс токенов",
@@ -30,9 +28,5 @@
   "closeOrderPrice": "На рынке {{market}} закрылся лот по цене {{price}}",
   "partialOrderPrice": "На рынке {{market}} частично закрылся лот по цене {{price}}",
   "newLotSuccess": "Лот добавлен на рынок",
-  "opSuccess": "Операция прошла успешно",
-  "confTitle": "На рынке не достаточно объема по указанной цене",
-  "confAvailableBuy": "Доступно к покупке по указанной цене {{value}} {{symbol}}",
-  "confAvailableSell": "Доступно к продаже по указанной цене {{value}} {{symbol}}",
-  "confAdded": "Оставшуюся часть, {{value}} {{symbol}} добавить на рынок"
+  "opSuccess": "Операция прошла успешно"
 }

@@ -9,7 +9,7 @@ const Form = (props) => {
       Number(props.fields.value.value), Number(props.fields.price.value)
     );
     if (approve !== false && approve <= 0) {
-      btn = <button type="submit" className="btn btn-default" disabled={props.form.submitting}>{props.form.submitting ? '...' : i18next.t('market:submitBuy')}</button>
+      btn = <button type="submit" className="btn btn-default" disabled={props.form.submitting}>{i18next.t('market:submitBuy')}</button>
     } else if (approve !== false) {
       currentApprove = (
         <div className="text-warning" style={{ marginBottom: 10 }}>
@@ -32,7 +32,7 @@ const Form = (props) => {
         }
       </div>
       <div className={(props.fields.price.error) ? 'form-group has-error' : 'form-group'}>
-        <span className="control-label">{i18next.t('market:maxPrice')}:</span>
+        <span className="control-label">{i18next.t('market:price')}:</span>
         <div className="input-group">
           <input value={props.fields.price.value} onChange={props.handleChange} name="price" type="text" className="form-control" />
           <div className="input-group-addon">{props.quote.info.symbol}</div>
