@@ -6,8 +6,11 @@ import { actions as actionsForm } from 'vol4-form'
 import { LOAD, MODULE, SET_ASKS_ORDERS, SET_BIDS_ORDERS, SET_LAST_PRICE } from './actionTypes'
 import { flashMessage } from '../app/actions'
 import { loadModule as loadModuleToken, loadApprove, loadBalance } from '../token/actions'
-import { MARKET_DEFAULT_ADDR1, ORDER_CLOSED, ORDER_PARTIAL } from '../../config/config'
-import { getLog, getPrice, getBlock } from '../../utils/helper'
+import { load as loadHistory } from '../history/actions'
+import { MARKET_DEFAULT_ADDR1, MARKET_DEFAULT_ADDR2, ORDER_CLOSED, ORDER_PARTIAL } from '../../config/config'
+import { getLog, getPrice, getBlock, promiseFor } from '../../utils/helper'
+import popup from '../../shared/components/app/popup'
+import confirmSwitch from '../../shared/components/app/confirmSwitch'
 
 export function module(info) {
   return {
@@ -189,6 +192,7 @@ export function events(address) {
                 'info',
                 true
               ))
+              dispatch(loadHistory(MARKET_DEFAULT_ADDR1, MARKET_DEFAULT_ADDR2))
             })
         })
         contract.listen('OrderPartial', (result) => {
@@ -201,6 +205,7 @@ export function events(address) {
                 'info',
                 true
               ))
+              dispatch(loadHistory(MARKET_DEFAULT_ADDR1, MARKET_DEFAULT_ADDR2))
             })
         })
       })
@@ -320,5 +325,154 @@ export function orderMarket(address, data, formId) {
         console.log(e);
         return Promise.reject();
       })
+  }
+}
+
+export function calcSwitch(address, type, price) {
+  let value = 0;
+  let stopPrice = 0;
+  let sum = 0;
+  let market;
+  const func = (type === 'buy') ? 'bids' : 'asks'
+  return hett.getContractByName('Market', address)
+    .then((contract) => {
+      market = contract;
+      return market.call(func + 'Length')
+    })
+    .then(length => (
+      promiseFor(i => (i < Number(length) && stopPrice < price), i => (
+        getOrder(market, func, i)
+          .then((order) => {
+            if (type === 'buy') {
+              let valuePart = 0
+              if (order.price >= price) {
+                valuePart = 1
+              } else {
+                valuePart = order.value
+              }
+              value += valuePart
+              sum += order.price * valuePart
+              stopPrice = order.price
+            }
+            return (i + 1);
+          })
+          .catch(() => false)
+      ), 0)
+    ))
+    .then(() => (
+      {
+        value,
+        stopPrice,
+        sum
+      }
+    ))
+}
+
+function popupShow(message) {
+  return popup({ message })
+}
+
+export function confirmSwitchOrder(message, address, data) {
+  return dispatch => (
+    confirmSwitch({ message })
+      .then(() => {
+        dispatch(send(address, 'orderMarket', [data.type, data.value]))
+      })
+      .catch(() => Promise.reject(Error('cancel!')))
+  )
+}
+
+export function switchDir() {
+  return (dispatch, getState) => {
+    const state = getState()
+    const address1 = MARKET_DEFAULT_ADDR1
+    const address2 = MARKET_DEFAULT_ADDR2
+    const names = {
+      [address1]: 'A',
+      [address2]: 'B'
+    }
+    const market = {
+      [address1]: null,
+      [address2]: null
+    }
+    let price1 = 0
+    let price2 = 0
+    if (_.has(state.market.modules, address1)) {
+      market[address1] = state.market.modules[address1]
+      if (_.has(market[address1], 'lastPrice')) {
+        price1 = market[address1].lastPrice
+      }
+    }
+    if (_.has(state.market.modules, address2)) {
+      market[address2] = state.market.modules[address2]
+      if (_.has(market[address2], 'lastPrice')) {
+        price2 = market[address2].lastPrice
+      }
+    }
+    if (price1 > 0 && price2 > 0) {
+      let activeMarket = MARKET_DEFAULT_ADDR1
+      if (price2 > price1) {
+        activeMarket = MARKET_DEFAULT_ADDR2
+      }
+      const deactiveMarket = (activeMarket === MARKET_DEFAULT_ADDR1) ?
+        MARKET_DEFAULT_ADDR2 : MARKET_DEFAULT_ADDR1
+      const priceDir = 'up'
+      const type = 'buy'
+      const typeNum = (type === 'buy') ? 1 : 0
+      let marketOp = null
+      let price = 0
+      // если цену нужно увеличить
+      if (priceDir === 'up') {
+        // ищем лот на противоположном рынке
+        price = market[activeMarket].lastPrice + 1
+        marketOp = market[deactiveMarket]
+      } else {
+        // ищем лот на противоположном рынке
+        price = market[activeMarket].lastPrice - 1
+        marketOp = market[activeMarket]
+      }
+      calcSwitch(marketOp.address, type, price)
+        .then((result) => {
+          if (result.stopPrice >= price) {
+            let approve = 0
+            let base = null
+            let quote = null
+            if (_.has(marketOp, 'info') && _.has(state.token.modules, marketOp.info.base) && _.has(state.token.modules, marketOp.info.quote)) {
+              if (_.has(state.token.modules[marketOp.info.base], 'info')) {
+                base = state.token.modules[marketOp.info.base]
+                if (_.has(base.approve, marketOp.address)) {
+                  approve = base.approve[marketOp.address];
+                }
+              }
+              if (_.has(state.token.modules[marketOp.info.quote], 'info')) {
+                quote = state.token.modules[marketOp.info.quote]
+                if (_.has(quote.approve, marketOp.address)) {
+                  approve = quote.approve[marketOp.address];
+                }
+              }
+            }
+            if (base !== null && quote !== null) {
+              let message = '<p>' + i18next.t('market:messageSwitch', { value: '<b>' + result.value + ' ' + base.info.symbol + '</b>', sum: '<b>' + result.sum + ' AIR</b>' }) + '</p>'
+              if (result.sum <= approve) {
+                console.log('покупаем', typeNum, result);
+                dispatch(confirmSwitchOrder(
+                  message, marketOp.address, { type: typeNum, value: result.value }
+                ))
+              } else {
+                message += '<p>' + i18next.t('market:nonApprove', { market: '<b>' + names[marketOp.address] + '</b>' }) + '</p>'
+                message += '<p>' + i18next.t('market:approveSum', { sum: '<b>' + result.sum + '</b>', approve: '<b>' + approve + '</b>' }) + '</p>'
+                message += '<p>' + i18next.t('market:approveText') + '</p>'
+                popupShow(message)
+              }
+            } else {
+              console.log('нет информации о токене');
+              popupShow('<p>Error.</p>')
+            }
+          } else {
+            popupShow('<p>' + i18next.t('market:notFoundLot') + '</p>')
+            console.log('нет подходящих лотов, у всех цена меньше ' + price);
+          }
+        })
+    }
   }
 }
