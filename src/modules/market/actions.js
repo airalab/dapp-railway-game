@@ -11,6 +11,7 @@ import { MARKET_DEFAULT_ADDR1, MARKET_DEFAULT_ADDR2, ORDER_CLOSED, ORDER_PARTIAL
 import { getLog, getPrice, getBlock, promiseFor } from '../../utils/helper'
 import popup from '../../shared/components/app/popup'
 import confirmSwitch from '../../shared/components/app/confirmSwitch'
+import { buildMaxHeap, buildMinHeap } from '../../utils/heap'
 
 export function module(info) {
   return {
@@ -328,10 +329,8 @@ export function orderMarket(address, data, formId) {
   }
 }
 
-export function calcSwitch(address, type, price) {
-  let value = 0;
-  let stopPrice = 0;
-  let sum = 0;
+export function getHeapMarket(address, type) {
+  const heap = [];
   let market;
   const func = (type === 'buy') ? 'bids' : 'asks'
   return hett.getContractByName('Market', address)
@@ -340,32 +339,57 @@ export function calcSwitch(address, type, price) {
       return market.call(func + 'Length')
     })
     .then(length => (
-      promiseFor(i => (i < Number(length) && stopPrice < price), i => (
+      promiseFor(i => (i < Number(length)), i => (
         getOrder(market, func, i)
           .then((order) => {
-            if (type === 'buy') {
-              let valuePart = 0
-              if (order.price >= price) {
-                valuePart = 1
-              } else {
-                valuePart = order.value
-              }
-              value += valuePart
-              sum += order.price * valuePart
-              stopPrice = order.price
-            }
+            heap.push(order)
             return (i + 1);
           })
           .catch(() => false)
       ), 0)
     ))
-    .then(() => (
-      {
+    .then(() => {
+      if (type === 'buy') {
+        return buildMinHeap(heap, 'price')
+      }
+      return buildMaxHeap(heap, 'price')
+    })
+}
+
+export function calcSwitch(address, type, price) {
+  let value = 0
+  let sum = 0
+  let stopPrice = 0
+  return getHeapMarket(address, type)
+    .then((result) => {
+      let heap = result
+      let stop = false
+      while (stop === false) {
+        const o = heap.shift()
+        let valuePart = 0
+        if (o.price >= price) {
+          valuePart = 1
+          stop = true
+        } else {
+          valuePart = o.value;
+          if (heap.length === 0) {
+            stop = true
+          } else if (type === 'buy') {
+            heap = buildMinHeap(heap, 'price')
+          } else {
+            heap = buildMaxHeap(heap, 'price')
+          }
+        }
+        value += valuePart;
+        sum += o.price * valuePart
+        stopPrice = o.price
+      }
+      return {
         value,
         stopPrice,
         sum
       }
-    ))
+    })
 }
 
 function popupShow(message) {
