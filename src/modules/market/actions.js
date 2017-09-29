@@ -195,7 +195,7 @@ export function events(address) {
               ))
               dispatch(loadHistory(MARKET_DEFAULT_ADDR1, MARKET_DEFAULT_ADDR2))
             })
-        })
+        }, { fromBlock: 'latest' })
         contract.listen('OrderPartial', (result) => {
           const id = Number(result.order)
           contract.call('priceOf', [id])
@@ -208,7 +208,7 @@ export function events(address) {
               ))
               dispatch(loadHistory(MARKET_DEFAULT_ADDR1, MARKET_DEFAULT_ADDR2))
             })
-        })
+        }, { fromBlock: 'latest' })
       })
   }
 }
