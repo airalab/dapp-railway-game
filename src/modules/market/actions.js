@@ -305,6 +305,7 @@ export function orderLimit(address, data, formId) {
       })
       .catch((e) => {
         console.log(e);
+        dispatch(actionsForm.stop(formId));
         return Promise.reject();
       })
   }
@@ -324,6 +325,7 @@ export function orderMarket(address, data, formId) {
       })
       .catch((e) => {
         console.log(e);
+        dispatch(actionsForm.stop(formId));
         return Promise.reject();
       })
   }
