@@ -40,7 +40,7 @@ export function getVideo() {
     //   type: SET_VIDEO,
     //   payload: '-lcz521X1PI'
     // })
-    axios.get('https://static.aira.life/liveid')
+    axios.get('https://static.aira.life/liveid?' + (new Date()).getTime())
       .then((result) => {
         dispatch({
           type: SET_VIDEO,
