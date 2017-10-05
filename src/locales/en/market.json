@@ -17,6 +17,7 @@
   "submitBuy": "Buy",
   "submitSell": "Sell",
   "nonValueApprove": "Not enough",
+  "nonValueBalance": "Not enough tokens in your account",
   "valueApprove": "available",
   "buyOrder": "Buy",
   "sellOrder": "Sell",

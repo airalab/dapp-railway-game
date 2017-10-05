@@ -17,6 +17,7 @@
   "submitBuy": "Купить",
   "submitSell": "Продать",
   "nonValueApprove": "Не хватает",
+  "nonValueBalance": "Не достаточно средств на вашем счете",
   "valueApprove": "доступно",
   "buyOrder": "Купить",
   "sellOrder": "Продать",

@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
 import BigNumber from 'bignumber.js'
+import hett from 'hett'
 import { Form } from 'vol4-form'
 import i18next from 'i18next'
 import Buy from '../components/buy/buy';
@@ -22,6 +23,7 @@ function mapStateToProps(state, props) {
     isLoadBids: true
   }
   let orders = [];
+  let balance = 0;
   let ap = 0;
   let token;
   let base = {
@@ -44,6 +46,10 @@ function mapStateToProps(state, props) {
       }
       if (_.has(state.token.modules[market.info.quote], 'info')) {
         quote = state.token.modules[market.info.quote]
+        const coinbase = hett.web3h.coinbase()
+        if (_.has(quote.balance, coinbase)) {
+          balance = quote.balance[coinbase];
+        }
         if (_.has(quote.approve, address)) {
           ap = quote.approve[address];
         }
@@ -61,6 +67,7 @@ function mapStateToProps(state, props) {
     quote,
     token,
     approve: ap,
+    balance,
     fields: {
       value: {
         value: '',

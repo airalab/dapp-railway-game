@@ -3,10 +3,16 @@ import i18next from 'i18next'
 
 const Form = (props) => {
   let btn = null
-  let currentApprove = null
+  let warning = null
   if (props.fields.value.value !== '') {
     const approve = props.calcApprove(Number(props.fields.value.value));
-    if (approve[0] > 0) {
+    if (approve[2] > props.balance) {
+      warning = (
+        <div className="text-warning" style={{ marginBottom: 10 }}>
+          <span className="fa fa-exclamation" /> {i18next.t('market:nonValueBalance')} <b>{props.quote.info.symbol}</b>
+        </div>
+      )
+    } else if (approve[0] > 0) {
       btn = <div className="alert alert-danger">
         {i18next.t('market:notEnoughTokens', { token: props.base.info.name })}
       </div>
@@ -19,7 +25,7 @@ const Form = (props) => {
         </div>
       )
     } else {
-      currentApprove = (
+      warning = (
         <div className="text-warning" style={{ marginBottom: 10 }}>
           <span className="fa fa-exclamation" /> {i18next.t('market:nonValueApprove')}: <b>{approve[1]} {props.quote.info.symbol}</b>, {i18next.t('market:valueApprove')}: <b>{props.approve} {props.quote.info.symbol}</b>
         </div>
@@ -39,7 +45,7 @@ const Form = (props) => {
           <span className="help-block">{props.fields.value.error}</span>
         }
       </div>
-      {currentApprove}
+      {warning}
       {btn}
       {props.form.success &&
         <div className="alert alert-success">{props.form.success}</div>

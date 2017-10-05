@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
 import BigNumber from 'bignumber.js'
+import hett from 'hett'
 import { Form } from 'vol4-form'
 import i18next from 'i18next'
 import Add from '../components/buy/add';
@@ -17,6 +18,7 @@ const Container = props => (
 function mapStateToProps(state, props) {
   const idForm = 'orderLimit_1_' + props.address;
   const address = props.address
+  let balance = 0;
   let ap = 0;
   let decimals = 0;
   let base = {
@@ -40,6 +42,10 @@ function mapStateToProps(state, props) {
       }
       if (_.has(state.token.modules[market.info.quote], 'info')) {
         quote = state.token.modules[market.info.quote]
+        const coinbase = hett.web3h.coinbase()
+        if (_.has(quote.balance, coinbase)) {
+          balance = quote.balance[coinbase];
+        }
         if (_.has(quote.approve, address)) {
           ap = quote.approve[address];
         }
@@ -52,6 +58,7 @@ function mapStateToProps(state, props) {
     base,
     quote,
     approve: ap,
+    balance,
     fields: {
       value: {
         value: '',
@@ -71,6 +78,15 @@ function mapStateToProps(state, props) {
         errors.price = i18next.t('market:formErrMsg')
       }
       return errors;
+    },
+    existBalance: (v, p) => {
+      const price = new BigNumber(p);
+      const value = new BigNumber(v);
+      const amount = price.times(value).div((new BigNumber(10)).pow(decimals));
+      if (amount.toNumber() <= balance) {
+        return true
+      }
+      return false
     },
     calcApprove: (v, p) => {
       const price = new BigNumber(p);

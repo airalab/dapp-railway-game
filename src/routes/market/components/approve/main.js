@@ -3,8 +3,20 @@ import i18next from 'i18next'
 
 const Form = (props) => {
   let btn = null
+  let warning = null
   if (props.fields.value.value !== '') {
-    btn = <button type="submit" className="btn btn-default" disabled={props.form.submitting}>{i18next.t('market:submit')}</button>
+    const balance = props.existBalance(
+      Number(props.fields.value.value)
+    );
+    if (balance) {
+      btn = <button type="submit" className="btn btn-default" disabled={props.form.submitting}>{i18next.t('market:submit')}</button>
+    } else {
+      warning = (
+        <div className="text-warning" style={{ marginBottom: 10 }}>
+          <span className="fa fa-exclamation" /> {i18next.t('market:nonValueBalance')}
+        </div>
+      )
+    }
   }
   return (
     <div>
@@ -26,6 +38,7 @@ const Form = (props) => {
             <span className="help-block">{props.fields.value.error}</span>
           }
         </div>
+        {warning}
         {btn}
         {props.form.success &&
           <div className="alert alert-success">{props.form.success}</div>

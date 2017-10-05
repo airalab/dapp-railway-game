@@ -60,6 +60,12 @@ function mapStateToProps(state, props) {
         errors.value = i18next.t('market:formErrMsg')
       }
       return errors;
+    },
+    existBalance: (v) => {
+      if (ap + v <= balance) {
+        return true
+      }
+      return false
     }
   }
 }
