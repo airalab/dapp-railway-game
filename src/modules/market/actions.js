@@ -366,6 +366,9 @@ export function calcSwitch(address, type, price) {
     .then((result) => {
       let heap = result
       let stop = false
+      if (heap.length <= 0) {
+        stop = true
+      }
       while (stop === false) {
         const o = heap.shift()
         let valuePart = 0
